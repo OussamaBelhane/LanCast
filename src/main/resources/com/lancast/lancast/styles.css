@@ -1,0 +1,102 @@
+/* Global Font */
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-background-color: white;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 20px 10px;
+}
+
+.sidebar-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-text-fill: #333333;
+}
+
+/* Navigation Buttons */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #666666;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #E0E0E0;
+    -fx-text-fill: #333333;
+}
+
+.nav-button.active {
+    -fx-background-color: #E0E0E0;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
+
+/* Center Pane */
+.center-pane {
+    -fx-background-color: white;
+    -fx-padding: 30px;
+}
+
+.header-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+    -fx-text-fill: black;
+}
+
+/* Drop Zone */
+.drop-zone {
+    -fx-background-color: #FAFAFA;
+    -fx-border-color: #CCCCCC;
+    -fx-border-style: dashed;
+    -fx-border-width: 2px;
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+}
+
+.drop-zone-text {
+    -fx-text-fill: #666666;
+    -fx-font-size: 14px;
+}
+
+/* File List */
+.file-list {
+    -fx-background-color: white;
+    -fx-border-color: #EEEEEE;
+    -fx-border-width: 1px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 10px;
+}
+
+/* Card */
+.card {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+    -fx-background-radius: 15px;
+    -fx-padding: 30px;
+    -fx-border-color: #EEEEEE;
+    -fx-border-radius: 15px;
+    -fx-border-width: 1px;
+}
+
+/* Pill */
+.pill {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 10px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #EEEEEE;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.pill-text {
+    -fx-font-family: 'Consolas', monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333;
+}

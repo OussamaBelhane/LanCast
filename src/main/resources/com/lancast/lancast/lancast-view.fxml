@@ -1,20 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.lancast.lancast.LanCastController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 
-    <Label fx:id="statusLabel" text="Server Stopped" style="-fx-text-fill: red;"/>
-    <Label fx:id="ipLabel" text="IP: Unavailable"/>
-
-    <Button text="Select Files" onAction="#onSelectFilesClick"/>
-    <Button fx:id="serverButton" text="Start Server" onAction="#onServerToggleClick"/>
-    <Button text="View Logs" onAction="#onViewLogsClick"/>
-</VBox>
+<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lancast.lancast.LanCastController">
+   <left>
+      <VBox prefWidth="220.0" styleClass="sidebar" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                  <Label styleClass="sidebar-label" text="LanCast" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" top="10.0" />
+               </padding>
+            </HBox>
+            <Separator opacity="0.5" prefWidth="200.0" />
+            <VBox spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" styleClass="nav-button, active" text="Home" maxWidth="Infinity">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#onViewLogsClick" styleClass="nav-button" text="Settings" maxWidth="Infinity">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets top="20.0" />
+               </padding>
+            </VBox>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <HBox spacing="20.0" styleClass="center-pane" BorderPane.alignment="CENTER">
+         <children>
+            <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="header-label" text="File Selection" />
+                  <StackPane fx:id="dropZone" minHeight="200.0" onMouseClicked="#onSelectFilesClick" styleClass="drop-zone">
+                     <children>
+                        <VBox alignment="CENTER" spacing="10.0">
+                           <children>
+                              <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label styleClass="drop-zone-text" text="Drag files here or Browse" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </StackPane>
+                  <Label fx:id="statusLabel" text="Ready to share" textFill="#666666" />
+                  <VBox styleClass="file-list" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label text="No files selected" textFill="#999999" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            <VBox maxWidth="300.0" minWidth="300.0" prefWidth="300.0" spacing="20.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label styleClass="header-label" text="Connection Hub" />
+                        <StackPane HBox.hgrow="ALWAYS" />
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </HBox>
+                  <VBox spacing="20.0" styleClass="card">
+                     <children>
+                        <StackPane>
+                           <children>
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#f0f0f0" height="150.0" stroke="TRANSPARENT" strokeType="INSIDE" width="150.0" />
+                              <Label text="QR Code" />
+                           </children>
+                        </StackPane>
+                        <VBox spacing="10.0">
+                           <children>
+                              <VBox styleClass="pill">
+                                 <children>
+                                    <Label text="URL" textFill="#999999">
+                                       <font>
+                                          <javafx.scene.text.Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="ipLabel" styleClass="pill-text" text="http://192.168.1.10:8000" />
+                                 </children>
+                              </VBox>
+                              <VBox styleClass="pill">
+                                 <children>
+                                    <Label text="Security PIN" textFill="#999999">
+                                       <font>
+                                          <javafx.scene.text.Font size="10.0" />
+                                       </font>
+                                    </Label>
+                                    <Label styleClass="pill-text" text="1234" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <Button fx:id="serverButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#onServerToggleClick" styleClass="nav-button" text="Start Server" style="-fx-alignment: CENTER; -fx-background-color: #F8F9FA; -fx-border-color: #EEEEEE;" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>
