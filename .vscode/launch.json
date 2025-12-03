@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "QRCodeGen",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast/com.lancast.lancast.core.QRCodeGen",
+            "projectName": "LanCast"
+        },
+        {
+            "type": "java",
+            "name": "lancast/NetworkDiag",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast/NetworkDiag",
+            "projectName": "LanCast"
+        },
+        {
+            "type": "java",
+            "name": "Launcher",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast/com.lancast.lancast.Launcher",
+            "projectName": "LanCast"
+        },
+        {
+            "type": "java",
+            "name": "Launch LanCast",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast.Launcher",
+            "projectName": "LanCast"
+        }
+    ]
+}

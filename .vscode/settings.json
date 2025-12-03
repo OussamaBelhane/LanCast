@@ -1,0 +1,9 @@
+{
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-25",
+            "path": "C:\\Users\\-_ Invictus\\.jdks\\openjdk-25.0.1",
+            "default": true
+        }
+    ]
+}

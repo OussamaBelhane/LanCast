@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LanCast - Download Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .pin-entry {
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: #475569;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 1.2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 15px;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .files-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .files-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .sender-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sender-info p {
+            color: #475569;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sender-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .files-list {
+            margin-bottom: 2rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+        }
+
+        .file-details h4 {
+            color: #1e293b;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            word-break: break-all;
+        }
+
+        .file-details p {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .file-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .file-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-all {
+            margin-top: 1.5rem;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            .pin-input {
+                font-size: 1.8rem;
+                letter-spacing: 10px;
+            }
+
+            .logo h1 {
+                font-size: 2rem;
+            }
+
+            .file-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .file-download {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>LanCast</h1>
+            <p>Enter PIN to download your files</p>
+        </div>
+
+        <div class="pin-entry" id="pinEntry">
+            <div class="error-message" id="errorMessage">
+                Invalid PIN. Please try again.
+            </div>
+
+            <div class="input-group">
+                <label>Enter 4-Digit PIN</label>
+                <input type="text" class="pin-input" placeholder="0000" maxlength="4" id="pinInput" autofocus>
+            </div>
+
+            <button class="btn btn-primary" id="accessBtn" onclick="accessFiles()">
+                <span id="btnText">Access Files</span>
+            </button>
+        </div>
+
+        <div class="files-section" id="filesSection">
+            <div class="sender-info">
+                <p>Files shared by</p>
+                <div class="sender-name" id="senderName">LanCast Host</div>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem;" id="fileCountInfo">Loading...</p>
+            </div>
+
+            <div class="files-list" id="filesList">
+                <!-- Files will be populated here -->
+            </div>
+
+            <button class="btn btn-primary download-all" onclick="downloadAll()">
+                Download All Files (ZIP)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const pinInput = document.getElementById('pinInput');
+        const errorMessage = document.getElementById('errorMessage');
+        const pinEntry = document.getElementById('pinEntry');
+        const filesSection = document.getElementById('filesSection');
+        const accessBtn = document.getElementById('accessBtn');
+        const btnText = document.getElementById('btnText');
+        const filesList = document.getElementById('filesList');
+        const fileCountInfo = document.getElementById('fileCountInfo');
+
+        // Allow only numbers in PIN input
+        pinInput.addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            errorMessage.classList.remove('show');
+        });
+
+        // Submit on Enter key
+        pinInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value.length === 4) {
+                accessFiles();
+            }
+        });
+
+        function accessFiles() {
+            const pin = pinInput.value;
+
+            if (pin.length !== 4) {
+                errorMessage.textContent = 'Please enter a 4-digit PIN';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            // Simulate loading
+            accessBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading"></span>';
+
+            // Simulate API call (in real app, verify PIN with backend)
+            setTimeout(() => {
+                // For demo: accept PIN "1234", reject others
+                if (pin === '1234') {
+                    pinEntry.style.display = 'none';
+                    filesSection.classList.add('active');
+                    fetchFiles();
+                } else {
+                    errorMessage.textContent = 'Invalid PIN. Please try again.';
+                    errorMessage.classList.add('show');
+                    accessBtn.disabled = false;
+                    btnText.textContent = 'Access Files';
+                    pinInput.value = '';
+                    pinInput.focus();
+                }
+            }, 500);
+        }
+
+        function fetchFiles() {
+            fetch('/api/files')
+                .then(response => response.json())
+                .then(files => {
+                    renderFiles(files);
+                })
+                .catch(err => {
+                    console.error('Error fetching files:', err);
+                    filesList.innerHTML = '<p style="text-align:center; color:red;">Error loading files.</p>';
+                });
+        }
+
+        function renderFiles(files) {
+            filesList.innerHTML = '';
+            let totalSize = 0;
+
+            if (files.length === 0) {
+                filesList.innerHTML = '<p style="text-align:center; color:#64748b;">No files shared.</p>';
+                fileCountInfo.textContent = '0 files';
+                return;
+            }
+
+            files.forEach(file => {
+                totalSize += file.size;
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                const sizeStr = formatSize(file.size);
+                const icon = getFileIcon(file.name);
+
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-icon">${icon}</div>
+                        <div class="file-details">
+                            <h4>${file.name}</h4>
+                            <p>${sizeStr}</p>
+                        </div>
+                    </div>
+                    <a href="/files/${encodeURIComponent(file.name)}" class="file-download" download>
+                        Download
+                    </a>
+                `;
+                filesList.appendChild(fileItem);
+            });
+
+            fileCountInfo.textContent = `${files.length} files • ${formatSize(totalSize)}`;
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) return '🖼️';
+            if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return '🎬';
+            if (['mp3', 'wav', 'ogg'].includes(ext)) return '🎵';
+            if (['pdf'].includes(ext)) return '📄';
+            if (['zip', 'rar', '7z'].includes(ext)) return '📦';
+            if (['doc', 'docx', 'txt'].includes(ext)) return '📝';
+            return '📁';
+        }
+
+        function downloadAll() {
+            window.location.href = '/download';
+        }
+    </script>
+</body>
+
+</html>
