@@ -7,6 +7,9 @@ public class TransferLog {
     public String deviceType;
     public String timestamp;
 
+    public TransferLog() {
+    }
+
     public TransferLog(int id, String clientIp, String fileName, String deviceType, String timestamp) {
         this.id = id;
         this.clientIp = clientIp;
@@ -33,6 +36,26 @@ public class TransferLog {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

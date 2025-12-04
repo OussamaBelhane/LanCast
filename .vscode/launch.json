@@ -3,6 +3,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "HistoryManager",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast/com.lancast.lancast.database.HistoryManager",
+            "projectName": "LanCast"
+        },
+        {
+            "type": "java",
+            "name": "LanCast",
+            "request": "launch",
+            "mainClass": "com.lancast.lancast/com.lancast.lancast.core.LanCast",
+            "projectName": "LanCast"
+        },
+        {
+            "type": "java",
             "name": "QRCodeGen",
             "request": "launch",
             "mainClass": "com.lancast.lancast/com.lancast.lancast.core.QRCodeGen",

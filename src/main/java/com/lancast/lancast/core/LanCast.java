@@ -47,6 +47,18 @@ public class LanCast {
     }
 
     /**
+     * Removes a file from the current session.
+     * 
+     * @param f The file to remove.
+     */
+    public static void removeFile(File f) {
+        if (f != null) {
+            sessionFiles.remove(f);
+            System.out.println("Removed from session: " + f.getName());
+        }
+    }
+
+    /**
      * Clears the current session.
      */
     public static void resetSession() {
@@ -78,6 +90,9 @@ public class LanCast {
 
         // Context to download individual files
         server.createContext("/files/", new FileDownloadHandler());
+
+        // API to verify PIN
+        server.createContext("/api/verify-pin", new PinVerifyHandler());
 
         server.setExecutor(null); // creates a default executor
         server.start();
@@ -314,6 +329,35 @@ public class LanCast {
         t.sendResponseHeaders(statusCode, bytes.length);
         try (OutputStream os = t.getResponseBody()) {
             os.write(bytes);
+        }
+    }
+
+    /**
+     * API Handler to verify PIN (POST /api/verify-pin).
+     */
+    static class PinVerifyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            if (!"POST".equals(t.getRequestMethod())) {
+                sendResponse(t, 405, "Method Not Allowed");
+                return;
+            }
+
+            // Read the PIN from the request body
+            String submittedPin;
+            try (java.util.Scanner scanner = new java.util.Scanner(t.getRequestBody(), StandardCharsets.UTF_8.name())) {
+                submittedPin = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+            }
+
+            // Get the actual PIN from settings
+            // We create a new instance to ensure we get the latest value from the file
+            String actualPin = new com.lancast.lancast.core.SettingsManager().getPin();
+
+            if (actualPin.equals(submittedPin.trim())) {
+                sendResponse(t, 200, "OK");
+            } else {
+                sendResponse(t, 401, "Invalid PIN");
+            }
         }
     }
 

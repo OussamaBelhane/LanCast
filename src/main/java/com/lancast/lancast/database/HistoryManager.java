@@ -25,7 +25,7 @@ public class HistoryManager {
                 ");";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             stmt.execute(sql);
 
@@ -39,7 +39,7 @@ public class HistoryManager {
         String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type) VALUES (?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, ip);
             pstmt.setString(2, fileName);
@@ -59,8 +59,8 @@ public class HistoryManager {
         String sql = "SELECT * FROM transfer_logs ORDER BY id DESC";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 logs.add(new TransferLog(
@@ -68,8 +68,7 @@ public class HistoryManager {
                         rs.getString("client_ip"),
                         rs.getString("file_name"),
                         rs.getString("device_type"),
-                        rs.getString("timestamp")
-                ));
+                        rs.getString("timestamp")));
             }
 
         } catch (SQLException e) {
@@ -89,7 +88,7 @@ public class HistoryManager {
         String sql = "DELETE FROM transfer_logs WHERE id = ?";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
@@ -106,7 +105,7 @@ public class HistoryManager {
         String sql = "DELETE FROM transfer_logs";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             stmt.execute(sql);
             System.out.println("All logs cleared.");
@@ -122,7 +121,7 @@ public class HistoryManager {
         String sql = "SELECT * FROM transfer_logs WHERE " + column + " LIKE ?";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, "%" + value + "%");
 
@@ -133,8 +132,7 @@ public class HistoryManager {
                         rs.getString("client_ip"),
                         rs.getString("file_name"),
                         rs.getString("device_type"),
-                        rs.getString("timestamp")
-                ));
+                        rs.getString("timestamp")));
             }
 
         } catch (SQLException e) {
@@ -158,7 +156,8 @@ public class HistoryManager {
     // Export to text
     public void exportToText(String file) {
         try (FileWriter fw = new FileWriter(file)) {
-            for (TransferLog log : getAllLogs()) fw.write(log + "\n");
+            for (TransferLog log : getAllLogs())
+                fw.write(log + "\n");
             System.out.println("Exported to " + file);
         } catch (IOException e) {
             System.out.println("Error exporting text: " + e.getMessage());

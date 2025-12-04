@@ -333,6 +333,7 @@
                 <label>Enter 4-Digit PIN</label>
                 <input type="text" class="pin-input" placeholder="0000" maxlength="4" id="pinInput" autofocus>
             </div>
+            <br>
 
             <button class="btn btn-primary" id="accessBtn" onclick="accessFiles()">
                 <span id="btnText">Access Files</span>
@@ -351,7 +352,7 @@
             </div>
 
             <button class="btn btn-primary download-all" onclick="downloadAll()">
-                Download All Files (ZIP)
+                Download All Files
             </button>
         </div>
     </div>
@@ -392,10 +393,13 @@
             accessBtn.disabled = true;
             btnText.innerHTML = '<span class="loading"></span>';
 
-            // Simulate API call (in real app, verify PIN with backend)
-            setTimeout(() => {
-                // For demo: accept PIN "1234", reject others
-                if (pin === '1234') {
+            // Verify PIN with backend
+            fetch('/api/verify-pin', {
+                method: 'POST',
+                body: pin
+            })
+            .then(response => {
+                if (response.ok) {
                     pinEntry.style.display = 'none';
                     filesSection.classList.add('active');
                     fetchFiles();
@@ -407,7 +411,14 @@
                     pinInput.value = '';
                     pinInput.focus();
                 }
-            }, 500);
+            })
+            .catch(error => {
+                console.error('Error verifying PIN:', error);
+                errorMessage.textContent = 'Error connecting to server.';
+                errorMessage.classList.add('show');
+                accessBtn.disabled = false;
+                btnText.textContent = 'Access Files';
+            });
         }
 
         function fetchFiles() {
@@ -478,7 +489,18 @@
         }
 
         function downloadAll() {
-            window.location.href = '/download';
+            const links = document.querySelectorAll('.file-download');
+            if (links.length === 0) {
+                alert('No files to download.');
+                return;
+            }
+
+            // Trigger downloads with a slight delay to prevent browser blocking
+            links.forEach((link, index) => {
+                setTimeout(() => {
+                    link.click();
+                }, index * 500);
+            });
         }
     </script>
 </body>

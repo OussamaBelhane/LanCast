@@ -9,7 +9,7 @@ module com.lancast.lancast {
     requires java.desktop;
 
     opens com.lancast.lancast to javafx.fxml;
-    opens com.lancast.lancast.database to javafx.base;
+    opens com.lancast.lancast.database to javafx.base, javafx.fxml;
 
     exports com.lancast.lancast;
 }
