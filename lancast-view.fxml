@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+   xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lancast.LanCastController" stylesheets="@styles.css" prefWidth="1200" prefHeight="800">
+
+   <left>
+      <VBox styleClass="sidebar" spacing="10" prefWidth="280">
+         <Label text="LANCast" styleClass="sidebar-label">
+            <VBox.margin>
+               <Insets bottom="20" left="10" top="10"/>
+            </VBox.margin>
+         </Label>
+
+         <Button text="📁 My Files" styleClass="nav-button, active" maxWidth="Infinity"/>
+         <Button text="👥 Connected Peers" styleClass="nav-button" maxWidth="Infinity"/>
+         <Button text="📊 Transfer History" styleClass="nav-button" maxWidth="Infinity"/>
+         <Button text="⚙️ Settings" styleClass="nav-button" maxWidth="Infinity"/>
+
+         <Region VBox.vgrow="ALWAYS" />
+
+         <VBox spacing="10" alignment="CENTER">
+            <VBox.margin>
+               <Insets bottom="20" left="10" right="10" top="10"/>
+            </VBox.margin>
+            <Button fx:id="serverButton" text="🚀 Start Server" style="-fx-background-color: #DC2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 14px 28px; -fx-background-radius: 14px;" maxWidth="Infinity" onAction="#toggleServer"/>
+            <Label text="v1.0.0 • Offline" style="-fx-text-fill: #9CA3AF; -fx-font-size: 11px;"/>
+         </VBox>
+      </VBox>
+   </left>
+
+   <center>
+      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+         <VBox styleClass="center-pane" spacing="25">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+               <VBox spacing="5">
+                  <Label text="Dashboard" styleClass="header-label"/>
+                  <Label text="Manage your file sharing and connections" style="-fx-font-size: 14px; -fx-opacity: 0.7;"/>
+               </VBox>
+               <Region HBox.hgrow="ALWAYS" />
+
+               <VBox styleClass="card" spacing="8" style="-fx-padding: 15 20; -fx-min-width: 180px;">
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <Circle radius="6" fill="#DC2626"/>
+                     <Label text="Server Offline" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                  </HBox>
+                  <HBox styleClass="pill" alignment="CENTER" spacing="8" style="-fx-padding: 6 12;">
+                     <Label text="🌐" style="-fx-font-size: 14px;"/>
+                     <Label text="192.168.1.105" styleClass="pill-text" style="-fx-font-size: 11px;"/>
+                  </HBox>
+               </VBox>
+            </HBox>
+
+            <HBox spacing="15">
+               <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS" style="-fx-padding: 20;">
+                  <Label text="📁 Total Files" style="-fx-font-size: 12px; -fx-opacity: 0.7;"/>
+                  <Label text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+                  <Label text="Ready to share" style="-fx-font-size: 11px; -fx-opacity: 0.6;"/>
+               </VBox>
+
+               <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS" style="-fx-padding: 20;">
+                  <Label text="👥 Active Peers" style="-fx-font-size: 12px; -fx-opacity: 0.7;"/>
+                  <Label text="2" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #7C3AED;"/>
+                  <Label text="Connected now" style="-fx-font-size: 11px; -fx-opacity: 0.6;"/>
+               </VBox>
+
+               <VBox styleClass="card" spacing="8" HBox.hgrow="ALWAYS" style="-fx-padding: 20;">
+                  <Label text="⚡ Transfer Speed" style="-fx-font-size: 12px; -fx-opacity: 0.7;"/>
+                  <Label text="0 MB/s" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #10B981;"/>
+                  <Label text="Current rate" style="-fx-font-size: 11px; -fx-opacity: 0.6;"/>
+               </VBox>
+            </HBox>
+
+            <StackPane styleClass="drop-zone">
+               <VBox alignment="CENTER" spacing="15">
+                  <Label text="📤" style="-fx-font-size: 48px;"/>
+                  <Label text="Drag and drop files here to share" styleClass="drop-zone-text"/>
+                  <Label text="Supported: All file types • Max size: Unlimited" style="-fx-font-size: 11px; -fx-opacity: 0.5;"/>
+                  <Button text="📂 Browse Files" style="-fx-background-color: #1A1A1A; -fx-text-fill: white; -fx-padding: 10 20; -fx-background-radius: 10px; -fx-font-weight: bold;"/>
+               </VBox>
+            </StackPane>
+
+            <HBox spacing="30">
+               <VBox spacing="15" HBox.hgrow="ALWAYS">
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <Label text="Recent Files" styleClass="header-label" style="-fx-font-size: 18px;"/>
+                     <Label text="0" style="-fx-background-color: #8B4513; -fx-text-fill: white; -fx-background-radius: 12px; -fx-padding: 4 10; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                  </HBox>
+
+                  <ListView styleClass="file-list" prefHeight="200">
+                     <placeholder>
+                        <VBox alignment="CENTER" spacing="15">
+                           <Label text="📂" style="-fx-font-size: 48px; -fx-opacity: 0.3;"/>
+                           <Label text="No files yet" style="-fx-opacity: 0.6; -fx-font-size: 14px;"/>
+                        </VBox>
+                     </placeholder>
+                  </ListView>
+
+                  <VBox spacing="10" styleClass="card" style="-fx-padding: 18;">
+                     <Label text="📊 Active Transfers" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                     <VBox spacing="8">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                           <Label text="📄 document.pdf" style="-fx-font-weight: bold;"/>
+                           <Region HBox.hgrow="ALWAYS"/>
+                           <Label text="45%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #7C3AED;"/>
+                        </HBox>
+                        <ProgressBar progress="0.45" maxWidth="Infinity" styleClass="progress-bar"/>
+                        <Label text="2.3 MB / 5.1 MB • 1.2 MB/s • 3s remaining" style="-fx-font-size: 11px; -fx-opacity: 0.6;"/>
+                     </VBox>
+                  </VBox>
+               </VBox>
+
+               <VBox spacing="20" minWidth="340">
+                  <VBox spacing="12">
+                     <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Quick Connect" styleClass="header-label" style="-fx-font-size: 18px;"/>
+                        <Label text="🔒" style="-fx-font-size: 14px;"/>
+                     </HBox>
+                     <VBox styleClass="qr-container" spacing="15" alignment="CENTER">
+                        <StackPane style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16px;">
+                           <Label text="🔲" style="-fx-font-size: 140px;"/>
+                        </StackPane>
+                        <Label text="Scan to connect instantly" style="-fx-font-size: 12px; -fx-opacity: 0.7; -fx-font-weight: 600;"/>
+
+                        <VBox styleClass="pill" spacing="5" alignment="CENTER" style="-fx-min-width: 280px;">
+                           <Label text="🌐 Connection URL" style="-fx-font-size: 10px; -fx-opacity: 0.6; -fx-font-weight: bold;"/>
+                           <Label fx:id="urlLabel" text="http://192.168.1.105:8080" styleClass="pill-text" style="-fx-font-size: 12px;"/>
+                        </VBox>
+
+                        <VBox styleClass="pill" spacing="5" alignment="CENTER" style="-fx-min-width: 280px; -fx-background-color: #FEF2F2;">
+                           <Label text="🔐 Security PIN" style="-fx-font-size: 10px; -fx-opacity: 0.6; -fx-font-weight: bold;"/>
+                           <Label fx:id="pinLabel" text="1234" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #DC2626; -fx-font-family: 'Consolas', monospace;"/>
+                        </VBox>
+                     </VBox>
+                  </VBox>
+
+                  <VBox spacing="12">
+                     <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Active Peers" styleClass="header-label" style="-fx-font-size: 18px;"/>
+                        <Label text="2" style="-fx-background-color: #7C3AED; -fx-text-fill: white; -fx-background-radius: 12px; -fx-padding: 4 10; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                     </HBox>
+
+                     <VBox spacing="12">
+                        <VBox styleClass="card" spacing="10">
+                           <HBox alignment="CENTER_LEFT" spacing="12">
+                              <Label text="💻" style="-fx-font-size: 24px;"/>
+                              <VBox spacing="4">
+                                 <Label text="MacBook Pro" styleClass="card-title"/>
+                                 <Label text="192.168.1.102" style="-fx-font-size: 10px; -fx-opacity: 0.5;"/>
+                              </VBox>
+                              <Region HBox.hgrow="ALWAYS"/>
+                              <Label text="Active" styleClass="status-active"/>
+                           </HBox>
+                        </VBox>
+
+                        <VBox styleClass="card" spacing="10">
+                           <HBox alignment="CENTER_LEFT" spacing="12">
+                              <Label text="🖥️" style="-fx-font-size: 24px;"/>
+                              <VBox spacing="4">
+                                 <Label text="Windows Desktop" styleClass="card-title"/>
+                                 <Label text="192.168.1.103" style="-fx-font-size: 10px; -fx-opacity: 0.5;"/>
+                              </VBox>
+                              <Region HBox.hgrow="ALWAYS"/>
+                              <Label text="Idle" styleClass="status-idle"/>
+                           </HBox>
+                        </VBox>
+                     </VBox>
+                  </VBox>
+               </VBox>
+            </HBox>
+         </VBox>
+      </ScrollPane>
+   </center>
+
+</BorderPane>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LanCast - Download Files</title>
+    <title>LanCast - File Sharing</title>
     <style>
         * {
             margin: 0;
@@ -27,8 +27,8 @@
             backdrop-filter: blur(10px);
             border-radius: 30px;
             box-shadow: 0 20px 80px rgba(0, 0, 0, 0.3);
-            padding: 3rem;
-            max-width: 600px;
+            padding: 2rem;
+            max-width: 650px;
             width: 100%;
             animation: slideUp 0.5s ease;
         }
@@ -47,7 +47,7 @@
 
         .logo {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .logo h1 {
@@ -63,6 +63,58 @@
         .logo p {
             color: #64748b;
             font-size: 1rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: #667eea;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .pin-entry {
@@ -131,6 +183,17 @@
             transform: none;
         }
 
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+        }
+
         .files-section {
             display: none;
             animation: fadeIn 0.5s ease;
@@ -138,16 +201,6 @@
 
         .files-section.active {
             display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
         }
 
         .sender-info {
@@ -172,6 +225,8 @@
 
         .files-list {
             margin-bottom: 2rem;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .file-item {
@@ -258,6 +313,21 @@
             animation: shake 0.5s ease;
         }
 
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
         @keyframes shake {
 
             0%,
@@ -290,9 +360,93 @@
             }
         }
 
+        /* Upload Zone */
+        .upload-zone {
+            border: 3px dashed #e2e8f0;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-zone.dragover {
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone h3 {
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .selected-files {
+            margin-bottom: 1.5rem;
+        }
+
+        .selected-file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-file-item span {
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0 5px;
+        }
+
+        .remove-file:hover {
+            color: #dc2626;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
         @media (max-width: 600px) {
             .container {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem;
             }
 
             .pin-input {
@@ -313,6 +467,11 @@
                 width: 100%;
                 text-align: center;
             }
+
+            .nav-tab {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -321,9 +480,10 @@
     <div class="container">
         <div class="logo">
             <h1>LanCast</h1>
-            <p>Enter PIN to download your files</p>
+            <p id="logoSubtitle">Enter PIN to access files</p>
         </div>
 
+        <!-- PIN Entry Section -->
         <div class="pin-entry" id="pinEntry">
             <div class="error-message" id="errorMessage">
                 Invalid PIN. Please try again.
@@ -340,20 +500,55 @@
             </button>
         </div>
 
-        <div class="files-section" id="filesSection">
-            <div class="sender-info">
-                <p>Files shared by</p>
-                <div class="sender-name" id="senderName">LanCast Host</div>
-                <p style="margin-top: 0.5rem; font-size: 0.85rem;" id="fileCountInfo">Loading...</p>
+        <!-- Main Content (after PIN verification) -->
+        <div id="mainContent" style="display: none;">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('download')">📥 Download</button>
+                <button class="nav-tab" onclick="switchTab('send')">📤 Send</button>
             </div>
 
-            <div class="files-list" id="filesList">
-                <!-- Files will be populated here -->
+            <!-- Download Tab -->
+            <div class="tab-content active" id="downloadTab">
+                <div class="sender-info">
+                    <p>Files shared by</p>
+                    <div class="sender-name" id="senderName">LanCast Host</div>
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem;" id="fileCountInfo">Loading...</p>
+                </div>
+
+                <div class="files-list" id="filesList">
+                    <!-- Files will be populated here -->
+                </div>
+
+                <button class="btn btn-primary download-all" onclick="downloadAll()">
+                    Download All Files
+                </button>
             </div>
 
-            <button class="btn btn-primary download-all" onclick="downloadAll()">
-                Download All Files
-            </button>
+            <!-- Send Tab -->
+            <div class="tab-content" id="sendTab">
+                <div class="success-message" id="uploadSuccess">
+                    Files uploaded successfully!
+                </div>
+                <div class="error-message" id="uploadError">
+                    Upload failed. Please try again.
+                </div>
+
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop files here or click to browse</h3>
+                    <p>Send files to the host device</p>
+                    <input type="file" id="fileInput" multiple>
+                </div>
+
+                <div class="selected-files" id="selectedFiles">
+                    <!-- Selected files will appear here -->
+                </div>
+
+                <button class="btn btn-secondary" id="uploadBtn" onclick="uploadFiles()" style="display: none;">
+                    <span id="uploadBtnText">📤 Send Files</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -361,11 +556,14 @@
         const pinInput = document.getElementById('pinInput');
         const errorMessage = document.getElementById('errorMessage');
         const pinEntry = document.getElementById('pinEntry');
-        const filesSection = document.getElementById('filesSection');
+        const mainContent = document.getElementById('mainContent');
         const accessBtn = document.getElementById('accessBtn');
         const btnText = document.getElementById('btnText');
         const filesList = document.getElementById('filesList');
         const fileCountInfo = document.getElementById('fileCountInfo');
+        const logoSubtitle = document.getElementById('logoSubtitle');
+
+        let filesToUpload = [];
 
         // Allow only numbers in PIN input
         pinInput.addEventListener('input', function (e) {
@@ -398,27 +596,43 @@
                 method: 'POST',
                 body: pin
             })
-            .then(response => {
-                if (response.ok) {
-                    pinEntry.style.display = 'none';
-                    filesSection.classList.add('active');
-                    fetchFiles();
-                } else {
-                    errorMessage.textContent = 'Invalid PIN. Please try again.';
+                .then(response => {
+                    if (response.ok) {
+                        pinEntry.style.display = 'none';
+                        mainContent.style.display = 'block';
+                        logoSubtitle.textContent = 'Share files on your network';
+                        fetchFiles();
+                    } else {
+                        errorMessage.textContent = 'Invalid PIN. Please try again.';
+                        errorMessage.classList.add('show');
+                        accessBtn.disabled = false;
+                        btnText.textContent = 'Access Files';
+                        pinInput.value = '';
+                        pinInput.focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error verifying PIN:', error);
+                    errorMessage.textContent = 'Error connecting to server.';
                     errorMessage.classList.add('show');
                     accessBtn.disabled = false;
                     btnText.textContent = 'Access Files';
-                    pinInput.value = '';
-                    pinInput.focus();
-                }
-            })
-            .catch(error => {
-                console.error('Error verifying PIN:', error);
-                errorMessage.textContent = 'Error connecting to server.';
-                errorMessage.classList.add('show');
-                accessBtn.disabled = false;
-                btnText.textContent = 'Access Files';
-            });
+                });
+        }
+
+        function switchTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Refresh data if needed
+            if (tabName === 'download') {
+                fetchFiles();
+            }
         }
 
         function fetchFiles() {
@@ -438,7 +652,7 @@
             let totalSize = 0;
 
             if (files.length === 0) {
-                filesList.innerHTML = '<p style="text-align:center; color:#64748b;">No files shared.</p>';
+                filesList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No files shared by host.</p></div>';
                 fileCountInfo.textContent = '0 files';
                 return;
             }
@@ -489,7 +703,7 @@
         }
 
         function downloadAll() {
-            const links = document.querySelectorAll('.file-download');
+            const links = document.querySelectorAll('#filesList .file-download');
             if (links.length === 0) {
                 alert('No files to download.');
                 return;
@@ -501,6 +715,112 @@
                     link.click();
                 }, index * 500);
             });
+        }
+
+        // File Upload Functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            addFilesToUpload(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            addFilesToUpload(e.target.files);
+        });
+
+        function addFilesToUpload(files) {
+            for (let file of files) {
+                if (!filesToUpload.find(f => f.name === file.name)) {
+                    filesToUpload.push(file);
+                }
+            }
+            renderSelectedFiles();
+        }
+
+        function renderSelectedFiles() {
+            selectedFilesDiv.innerHTML = '';
+
+            if (filesToUpload.length === 0) {
+                uploadBtn.style.display = 'none';
+                return;
+            }
+
+            filesToUpload.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'selected-file-item';
+                div.innerHTML = `
+                    <span>${getFileIcon(file.name)} ${file.name} (${formatSize(file.size)})</span>
+                    <button class="remove-file" onclick="removeFileFromUpload(${index})">✕</button>
+                `;
+                selectedFilesDiv.appendChild(div);
+            });
+
+            uploadBtn.style.display = 'block';
+        }
+
+        function removeFileFromUpload(index) {
+            filesToUpload.splice(index, 1);
+            renderSelectedFiles();
+        }
+
+        function uploadFiles() {
+            if (filesToUpload.length === 0) return;
+
+            const uploadBtnText = document.getElementById('uploadBtnText');
+            const uploadSuccess = document.getElementById('uploadSuccess');
+            const uploadError = document.getElementById('uploadError');
+
+            uploadBtn.disabled = true;
+            uploadBtnText.innerHTML = '<span class="loading"></span> Uploading...';
+            uploadSuccess.classList.remove('show');
+            uploadError.classList.remove('show');
+
+            const formData = new FormData();
+            filesToUpload.forEach(file => {
+                formData.append('files', file);
+            });
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        uploadSuccess.textContent = `${data.count} file(s) uploaded successfully!`;
+                        uploadSuccess.classList.add('show');
+                        filesToUpload = [];
+                        renderSelectedFiles();
+                        fileInput.value = '';
+                    } else {
+                        uploadError.textContent = data.error || 'Upload failed.';
+                        uploadError.classList.add('show');
+                    }
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    uploadError.textContent = 'Error uploading files.';
+                    uploadError.classList.add('show');
+                })
+                .finally(() => {
+                    uploadBtn.disabled = false;
+                    uploadBtnText.innerHTML = '📤 Send Files';
+                });
         }
     </script>
 </body>

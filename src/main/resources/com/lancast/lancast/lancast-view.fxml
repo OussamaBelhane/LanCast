@@ -4,194 +4,246 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.shape.Circle?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" style="-fx-font-family: 'Segoe UI', sans-serif;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lancast.lancast.LanCastController">
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/17"
+   xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lancast.lancast.LanCastController" 
+   stylesheets="@styles.css">
+
+   <!-- SIDEBAR -->
    <left>
-      <VBox prefHeight="600.0" prefWidth="220.0" spacing="10.0" style="-fx-background-color: #F7F8FA;" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="LanCast" textFill="#333333">
-               <font>
-                  <Font name="System Bold" size="24.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="20.0" left="20.0" top="30.0" />
-               </VBox.margin>
-            </Label>
-            <Separator prefWidth="200.0" />
-            <Button fx:id="homeBtn" mnemonicParsing="false" onAction="#handleHome" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #E1E5EA; -fx-background-radius: 8; -fx-text-fill: black; -fx-font-weight: bold; -fx-alignment: CENTER_LEFT; -fx-padding: 10 20; -fx-cursor: hand;" text="Home">
-               <font>
-                  <Font size="14.0" />
-               </font>
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="historyBtn" mnemonicParsing="false" onAction="#handleHistory" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-size: 14px; -fx-alignment: CENTER_LEFT; -fx-padding: 10 20; -fx-cursor: hand;" text="History">
-               <font>
-                  <Font size="14.0" />
-               </font>
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="settingsBtn" mnemonicParsing="false" onAction="#handleSettings" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-size: 14px; -fx-alignment: CENTER_LEFT; -fx-padding: 10 20; -fx-cursor: hand;" text="Settings">
-               <font>
-                  <Font size="14.0" />
-               </font>
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </Button>
-         </children>
+      <VBox styleClass="sidebar" spacing="8" prefWidth="250">
+         <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="◈" style="-fx-font-size: 26px; -fx-text-fill: -accent-color;"/>
+            <Label text="LANCast" styleClass="sidebar-label" style="-fx-padding: 0;"/>
+         </HBox>
+         
+         <Region prefHeight="20"/>
+
+         <Button fx:id="homeBtn" text="  Dashboard" styleClass="nav-button" maxWidth="Infinity" onAction="#handleHome"/>
+         <Button fx:id="historyBtn" text="  History" styleClass="nav-button" maxWidth="Infinity" onAction="#handleHistory"/>
+         <Button fx:id="receiveBtn" text="  Inbox" styleClass="nav-button" maxWidth="Infinity" onAction="#handleReceive"/>
+         <Button fx:id="settingsBtn" text="  Settings" styleClass="nav-button" maxWidth="Infinity" onAction="#handleSettings"/>
+
+         <Region VBox.vgrow="ALWAYS"/>
+
+         <VBox spacing="12" alignment="CENTER" style="-fx-background-color: -input-bg; -fx-background-radius: 12; -fx-padding: 18;">
+            <Label text="SERVER" style="-fx-text-fill: -text-muted; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Button fx:id="startBtn" text="▶  Start" styleClass="server-button-start" maxWidth="Infinity" onAction="#handleStart"/>
+            <Label fx:id="versionLabel" text="v1.0.0 • Offline" styleClass="version-label"/>
+         </VBox>
       </VBox>
    </left>
+
+   <!-- CENTER -->
    <center>
-      <StackPane style="-fx-background-color: #FFFFFF;" BorderPane.alignment="CENTER">
-         <children>
-            <VBox fx:id="homeView" prefHeight="200.0" prefWidth="100.0" spacing="20.0">
-               <children>
-                  <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-                     <children>
-                        <!-- File Selection Panel -->
-                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0); -fx-padding: 20;" HBox.hgrow="ALWAYS">
-                           <children>
-                              <Label text="Select Files" textFill="#333333">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
-                              <StackPane fx:id="dropZone" onMouseClicked="#handleBrowseFiles" prefHeight="150.0" prefWidth="200.0" style="-fx-border-color: #CCCCCC; -fx-border-style: dashed; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-color: #FAFAFA; -fx-cursor: hand;">
-                                 <children>
-                                    <Label text="Drag files here or Click to Browse" textFill="#999999">
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                 </children>
-                              </StackPane>
-                              <Label fx:id="statusLabel" text="0 files selected" textFill="#666666">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Label>
-                              <VBox style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" VBox.vgrow="ALWAYS">
-                                 <children>
-                                    <ListView fx:id="fileListView" prefHeight="200.0" prefWidth="200.0" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS" />
-                                 </children>
+      <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+         <StackPane fx:id="contentPane" style="-fx-background-color: -surface;">
+            
+            <!-- HOME VIEW -->
+            <VBox fx:id="homeView" styleClass="center-pane" spacing="25">
+               
+               <!-- Header with Status + Peers -->
+               <HBox alignment="CENTER_LEFT" spacing="15">
+                  <VBox spacing="5">
+                     <Label text="Dashboard" styleClass="header-label"/>
+                     <Label text="Manage your file sharing" styleClass="subtitle-label"/>
+                  </VBox>
+                  <Region HBox.hgrow="ALWAYS"/>
+                  
+                  <!-- Connected Peers Badge -->
+                  <HBox styleClass="card-small" alignment="CENTER" spacing="8" style="-fx-padding: 12 18;">
+                     <Label text="👥" style="-fx-font-size: 16px;"/>
+                     <Label fx:id="peerCountLabel" text="0" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: -accent-color;"/>
+                     <Label text="Peers" style="-fx-font-size: 13px; -fx-text-fill: -text-muted;"/>
+                  </HBox>
+                  
+                  <!-- Status Card with Offline + URL -->
+                  <VBox styleClass="card-small" spacing="8" style="-fx-padding: 12 18;">
+                     <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Circle fx:id="statusCircle" radius="5" fill="#ef4444"/>
+                        <Label fx:id="serverStatusLabel" text="Offline" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: -text-primary;"/>
+                     </HBox>
+                     <HBox alignment="CENTER" spacing="6">
+                        <Label text="🌐" style="-fx-font-size: 12px;"/>
+                        <Label fx:id="ipLabel" text="Not Connected" style="-fx-font-size: 11px; -fx-text-fill: -text-muted;"/>
+                     </HBox>
+                  </VBox>
+               </HBox>
+
+               <!-- MAIN ROW: Drop Zone + QR Code SIDE BY SIDE -->
+               <HBox spacing="30" VBox.vgrow="ALWAYS">
+                  
+                  <!-- LEFT: Drop Zone + Files List -->
+                  <VBox spacing="20" HBox.hgrow="ALWAYS">
+                     
+                     <!-- Share Files Title -->
+                     <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Share Files" styleClass="section-title"/>
+                        <Label text="📤" style="-fx-font-size: 14px;"/>
+                     </HBox>
+                     
+                     <!-- Drop Zone -->
+                     <StackPane fx:id="dropZone" styleClass="drop-zone" onMouseClicked="#handleBrowseFiles" VBox.vgrow="ALWAYS" minHeight="250">
+                        <VBox alignment="CENTER" spacing="15">
+                           <Label text="📤" style="-fx-font-size: 52px;"/>
+                           <Label text="Drop files here or click to browse" styleClass="drop-zone-text"/>
+                           <Button text="📂 Browse" styleClass="browse-button" onAction="#handleBrowseFiles"/>
+                        </VBox>
+                     </StackPane>
+
+                     <!-- Files Section -->
+                     <VBox spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                           <Label text="📁 Files" styleClass="section-title"/>
+                           <Label fx:id="fileCountLabel" text="0" styleClass="count-badge"/>
+                           <Label fx:id="statusLabel" text="Ready to share" style="-fx-font-size: 13px; -fx-text-fill: -text-muted;"/>
+                           <Region HBox.hgrow="ALWAYS"/>
+                           <Button fx:id="clearBtn" text="Clear" styleClass="clear-button" onAction="#handleClear"/>
+                        </HBox>
+                        
+                        <ListView fx:id="fileListView" styleClass="file-list" prefHeight="180">
+                           <placeholder>
+                              <VBox alignment="CENTER" spacing="12">
+                                 <Label text="📂" style="-fx-font-size: 42px; -fx-opacity: 0.2;"/>
+                                 <Label text="No files added" style="-fx-text-fill: -text-muted; -fx-font-size: 14px;"/>
                               </VBox>
-                              <Button fx:id="clearBtn" mnemonicParsing="false" onAction="#handleClear" style="-fx-background-color: #ffdddd; -fx-text-fill: #d32f2f; -fx-background-radius: 10; -fx-cursor: hand;" text="Clear All">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                           </children>
+                           </placeholder>
+                        </ListView>
+                     </VBox>
+                  </VBox>
+
+                  <!-- RIGHT: QR Code Box (SAME ROW) -->
+                  <VBox spacing="15" minWidth="380" maxWidth="400">
+                     <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Quick Connect" styleClass="section-title"/>
+                        <Label text="🔒" style="-fx-font-size: 14px;"/>
+                     </HBox>
+                     
+                     <VBox styleClass="qr-container" spacing="20" alignment="CENTER" VBox.vgrow="ALWAYS">
+                        <!-- QR Code -->
+                        <StackPane style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 14px;">
+                           <Label fx:id="qrPlaceholderLabel" text="📱" style="-fx-font-size: 140px; -fx-opacity: 0.12;"/>
+                           <ImageView fx:id="qrCodeImageView" fitHeight="200" fitWidth="200" pickOnBounds="true" preserveRatio="true"/>
+                        </StackPane>
+                        
+                        <Label text="Scan to connect" style="-fx-font-size: 14px; -fx-text-fill: -text-muted; -fx-font-weight: 600;"/>
+
+                        <!-- URL - Click to copy -->
+                        <VBox styleClass="pill" spacing="5" alignment="CENTER" style="-fx-min-width: 320px; -fx-cursor: hand;" onMouseClicked="#handleCopyUrl">
+                           <Label text="URL (click to copy)" style="-fx-font-size: 11px; -fx-text-fill: -text-muted; -fx-font-weight: bold;"/>
+                           <Label fx:id="urlLabel" text="http://0.0.0.0:8080" styleClass="pill-text"/>
                         </VBox>
 
-                        <!-- Connection Hub -->
-                        <VBox alignment="TOP_CENTER" prefWidth="300.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0); -fx-padding: 30;">
-                           <children>
-                              <Label text="Connection Hub" textFill="#333333">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
-                              <!-- QR Code with specific styling -->
-                              <StackPane style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 10; -fx-background-color: white; -fx-background-radius: 10;">
-                                 <children>
-                                    <Label fx:id="qrPlaceholderLabel" text="QR Code" textFill="#cccccc">
-                                       <font>
-                                          <Font size="24.0" />
-                                       </font>
-                                    </Label>
-                                    <ImageView fx:id="qrCodeImageView" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" />
-                                 </children>
-                              </StackPane>
-                              
-                              <HBox alignment="CENTER" spacing="10.0">
-                                 <children>
-                                    <Label text="PIN:" textFill="#666666">
-                                       <font>
-                                          <Font name="System Bold" size="14.0" />
-                                       </font>
-                                    </Label>
-                                    <Label fx:id="pinLabel" text="1234" textFill="#333333">
-                                       <font>
-                                          <Font name="Monospaced Bold" size="24.0" />
-                                       </font>
-                                    </Label>
-                                    <Button mnemonicParsing="false" onAction="#handleRefreshPin" style="-fx-background-color: #f0f0f0; -fx-background-radius: 50%; -fx-cursor: hand; -fx-min-width: 30px; -fx-min-height: 30px; -fx-max-width: 30px; -fx-max-height: 30px;" text="↻" textFill="#666666">
-                                       <font>
-                                          <Font size="14.0" />
-                                       </font>
-                                    </Button>
-                                 </children>
-                              </HBox>
-                              <Label fx:id="ipLabel" text="IP: Unavailable" textFill="#666666">
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Label>
-                              <Button fx:id="startBtn" mnemonicParsing="false" onAction="#handleStart" prefWidth="220.0" style="-fx-background-color: linear-gradient(to right, #2ecc71, #27ae60); -fx-text-fill: white; -fx-background-radius: 30; -fx-cursor: hand;" text="Start Server">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="12.0" top="12.0" />
-                                 </padding>
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </Button>
-                           </children>
-                        </VBox>
-                     </children>
+                        <!-- PIN -->
+                        <HBox spacing="12" alignment="CENTER">
+                           <VBox styleClass="pill-pin" spacing="5" alignment="CENTER" style="-fx-min-width: 240px;" HBox.hgrow="ALWAYS">
+                              <Label text="PIN" style="-fx-font-size: 11px; -fx-text-fill: -text-muted; -fx-font-weight: bold;"/>
+                              <Label fx:id="pinLabel" text="1234" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: -accent-color; -fx-font-family: 'Consolas', monospace;"/>
+                           </VBox>
+                           <Button text="↻" styleClass="refresh-button" onAction="#handleRefreshPin"/>
+                        </HBox>
+                     </VBox>
+                  </VBox>
+               </HBox>
+            </VBox>
+
+            <!-- HISTORY VIEW -->
+            <VBox fx:id="historyView" styleClass="center-pane" spacing="20" visible="false">
+               <VBox spacing="5">
+                  <Label text="History" styleClass="header-label"/>
+                  <Label text="Past file transfers" styleClass="subtitle-label"/>
+               </VBox>
+               <TableView fx:id="historyTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+                  <columns>
+                     <TableColumn fx:id="timeCol" text="Time" prefWidth="160"/>
+                     <TableColumn fx:id="deviceCol" text="Device" prefWidth="140"/>
+                     <TableColumn fx:id="fileCol" text="File" prefWidth="320"/>
+                     <TableColumn fx:id="ipCol" text="IP Address" prefWidth="140"/>
+                  </columns>
+               </TableView>
+            </VBox>
+
+            <!-- RECEIVE VIEW -->
+            <VBox fx:id="receiveView" styleClass="center-pane" spacing="20" visible="false">
+               <HBox alignment="CENTER_LEFT" spacing="15">
+                  <VBox spacing="5">
+                     <Label text="Inbox" styleClass="header-label"/>
+                     <Label text="Received files" styleClass="subtitle-label"/>
+                  </VBox>
+                  <Region HBox.hgrow="ALWAYS"/>
+                  <Button text="↻" styleClass="refresh-button" onAction="#handleRefreshReceived"/>
+                  <Label fx:id="receivedCountLabel" text="0 files" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-secondary;"/>
+               </HBox>
+               <VBox styleClass="card-small" VBox.vgrow="ALWAYS" style="-fx-padding: 0;">
+                  <ListView fx:id="receivedFilesListView" styleClass="file-list" VBox.vgrow="ALWAYS"/>
+               </VBox>
+               <Button text="📂 Open Folder" styleClass="action-button" onAction="#handleOpenUploadsFolder"/>
+            </VBox>
+
+            <!-- SETTINGS VIEW -->
+            <VBox fx:id="settingsView" styleClass="center-pane" spacing="25" visible="false">
+               <VBox spacing="5">
+                  <Label text="Settings" styleClass="header-label"/>
+                  <Label text="Customize LanCast" styleClass="subtitle-label"/>
+               </VBox>
+               
+               <!-- Appearance -->
+               <VBox styleClass="settings-section" spacing="18" style="-fx-max-width: 450px;">
+                  <Label text="🎨 Appearance" styleClass="settings-title"/>
+                  
+                  <HBox alignment="CENTER_LEFT" spacing="15">
+                     <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Mode" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-primary;"/>
+                        <Label text="Dark or Light theme" styleClass="settings-description"/>
+                     </VBox>
+                     <Button fx:id="modeToggleBtn" text="🌙" styleClass="mode-toggle" onAction="#handleModeToggle"/>
                   </HBox>
-               </children>
-               <padding>
-                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-               </padding>
+                  
+                  <VBox spacing="10">
+                     <Label text="Accent Color" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-primary;"/>
+                     <HBox spacing="14" alignment="CENTER_LEFT">
+                        <Button fx:id="accentPurpleBtn" styleClass="accent-button, accent-purple-btn" onAction="#handleAccentPurple"/>
+                        <Button fx:id="accentBlueBtn" styleClass="accent-button, accent-blue-btn" onAction="#handleAccentBlue"/>
+                        <Button fx:id="accentPinkBtn" styleClass="accent-button, accent-pink-btn" onAction="#handleAccentPink"/>
+                        <Button fx:id="accentGreenBtn" styleClass="accent-button, accent-green-btn" onAction="#handleAccentGreen"/>
+                        <Button fx:id="accentOrangeBtn" styleClass="accent-button, accent-orange-btn" onAction="#handleAccentOrange"/>
+                     </HBox>
+                  </VBox>
+               </VBox>
+               
+               <!-- Security -->
+               <VBox styleClass="settings-section" spacing="15" style="-fx-max-width: 450px;">
+                  <Label text="🔐 Security" styleClass="settings-title"/>
+                  <HBox alignment="CENTER_LEFT" spacing="15">
+                     <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="PIN Code" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-primary;"/>
+                        <Label text="Required for connections" styleClass="settings-description"/>
+                     </VBox>
+                     <Label fx:id="settingsPinLabel" text="1234" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-font-family: 'Consolas', monospace; -fx-text-fill: -text-primary;"/>
+                     <Button text="↻" styleClass="refresh-button" onAction="#handleRefreshPin"/>
+                  </HBox>
+               </VBox>
+               
+               <!-- About -->
+               <VBox styleClass="settings-section" spacing="10" style="-fx-max-width: 450px;">
+                  <Label text="ℹ️ About" styleClass="settings-title"/>
+                  <Label text="LanCast v1.0.0" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-primary;"/>
+                  <Label text="Simple and secure LAN file sharing" styleClass="settings-description"/>
+               </VBox>
             </VBox>
-            <VBox fx:id="historyView" prefHeight="200.0" prefWidth="100.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 30;" visible="false">
-               <children>
-                  <Label text="Recent Transfers" textFill="#333333">
-                     <font>
-                        <Font name="System Bold" size="24.0" />
-                     </font>
-                  </Label>
-                  <javafx.scene.control.TableView fx:id="historyTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-base: white; -fx-control-inner-background: white; -fx-table-cell-border-color: transparent; -fx-background-radius: 10; -fx-border-color: #E0E0E0; -fx-border-radius: 10;">
-                     <columns>
-                        <javafx.scene.control.TableColumn fx:id="timeCol" text="Time" prefWidth="150.0" style="-fx-alignment: CENTER_LEFT; -fx-padding: 0 10;" />
-                        <javafx.scene.control.TableColumn fx:id="deviceCol" text="Device" prefWidth="150.0" style="-fx-alignment: CENTER_LEFT; -fx-padding: 0 10;" />
-                        <javafx.scene.control.TableColumn fx:id="fileCol" text="File" prefWidth="300.0" style="-fx-alignment: CENTER_LEFT; -fx-padding: 0 10;" />
-                        <javafx.scene.control.TableColumn fx:id="ipCol" text="IP Address" prefWidth="150.0" style="-fx-alignment: CENTER_LEFT; -fx-padding: 0 10;" />
-                     </columns>
-                  </javafx.scene.control.TableView>
-               </children>
-            </VBox>
-            <VBox fx:id="settingsView" prefHeight="200.0" prefWidth="100.0" spacing="20.0" style="-fx-background-color: white;" visible="false">
-               <children>
-                  <Label text="Settings" textFill="#333333">
-                     <font>
-                        <Font name="System Bold" size="24.0" />
-                     </font>
-                  </Label>
-                  <Label text="Application settings will appear here." textFill="#666666" />
-               </children>
-               <padding>
-                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-               </padding>
-            </VBox>
-         </children>
-      </StackPane>
+
+         </StackPane>
+      </ScrollPane>
    </center>
+
 </BorderPane>

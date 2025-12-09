@@ -1,0 +1,229 @@
+/* ============================================
+   PROFESSIONAL DARK THEME
+   ============================================ */
+
+.root {
+    -fx-font-family: 'Segoe UI', 'Inter', sans-serif;
+    -fx-background-color: #F5F5F5;
+
+    /* Professional Color Palette */
+    -primary-color: #1A1A1A;
+    /* Black */
+    -primary-dark: #000000;
+    /* Pure Black */
+    -primary-light: #E5E5E5;
+    /* Light Gray */
+    -primary-lighter: #F5F5F5;
+    /* Very Light Gray */
+    -accent-color: #8B4513;
+    /* Brown */
+    -accent-red: #DC2626;
+    /* Red */
+    -accent-purple: #7C3AED;
+    /* Purple */
+    -text-primary: #1A1A1A;
+    /* Black */
+    -text-secondary: #6B7280;
+    /* Gray */
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #1A1A1A;
+    -fx-padding: 30px 20px;
+}
+
+.sidebar-label {
+    -fx-font-weight: 800;
+    -fx-font-size: 28px;
+    -fx-text-fill: white;
+    -fx-padding: 0 0 20px 0;
+}
+
+/* Navigation Button */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #9CA3AF;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 14px 20px;
+    -fx-background-radius: 12px;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.nav-button:hover {
+    -fx-background-color: #2D2D2D;
+    -fx-text-fill: white;
+}
+
+.nav-button.active {
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+}
+
+/* Center Pane */
+.center-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 40px;
+}
+
+.header-label {
+    -fx-font-weight: 700;
+    -fx-font-size: 26px;
+    -fx-text-fill: #1A1A1A;
+}
+
+/* Drop Zone */
+.drop-zone {
+    -fx-background-color: white;
+    -fx-border-color: #1A1A1A;
+    -fx-border-style: dashed;
+    -fx-border-width: 3px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-alignment: center;
+    -fx-min-height: 220px;
+    -fx-cursor: hand;
+}
+
+.drop-zone:hover {
+    -fx-border-color: #7C3AED;
+    -fx-background-color: #FAF5FF;
+}
+
+.drop-zone-text {
+    -fx-text-fill: #1A1A1A;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+/* QR Code Container */
+.qr-container {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+/* File List */
+.file-list {
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+    -fx-border-color: transparent;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 14px;
+    -fx-text-fill: #1A1A1A;
+    -fx-font-size: 14px;
+}
+
+.list-cell:filled:selected,
+.list-cell:filled:hover {
+    -fx-background-color: #F3F4F6;
+    -fx-background-radius: 10px;
+}
+
+/* Card */
+.card {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 18, 0, 0, 4);
+    -fx-background-radius: 24px;
+    -fx-padding: 30px;
+    -fx-min-width: 260px;
+    -fx-border-color: #E5E5E5;
+    -fx-border-width: 1px;
+    -fx-border-radius: 24px;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1A1A1A;
+}
+
+/* Pill */
+.pill {
+    -fx-background-color: white;
+    -fx-padding: 10px 18px;
+    -fx-background-radius: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, 2);
+    -fx-border-color: #E5E5E5;
+    -fx-border-width: 1px;
+    -fx-border-radius: 24px;
+}
+
+.pill-text {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 14px;
+    -fx-text-fill: #1A1A1A;
+    -fx-font-weight: 700;
+}
+
+/* Status Badges */
+.status-active {
+    -fx-text-fill: white;
+    -fx-background-color: #10B981;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 10px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-idle {
+    -fx-text-fill: white;
+    -fx-background-color: #F59E0B;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 10px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-offline {
+    -fx-text-fill: white;
+    -fx-background-color: #DC2626;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 10px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Progress Bar */
+.progress-bar {
+    -fx-background-color: #E5E5E5;
+    -fx-background-radius: 10px;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #7C3AED;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-pane .thumb {
+    -fx-background-color: #1A1A1A;
+    -fx-background-radius: 4px;
+    -fx-opacity: 0.3;
+}
+
+.scroll-pane .thumb:hover {
+    -fx-opacity: 0.5;
+}

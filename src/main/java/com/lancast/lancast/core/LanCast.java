@@ -5,8 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -28,9 +31,12 @@ import java.util.List;
 public class LanCast {
 
     private static final int PORT = 8000;
+    private static final String UPLOADS_DIR = "uploads";
     private static HttpServer server;
-    // Session state to hold selected files
+    // Session state to hold selected files (shared by host)
     private static List<File> sessionFiles = new ArrayList<>();
+    // Received files (uploaded by web clients)
+    private static List<File> receivedFiles = new ArrayList<>();
 
     // --- Control Methods for GUI ---
 
@@ -77,6 +83,15 @@ public class LanCast {
             System.out.println("Server already running.");
             return;
         }
+
+        // Create uploads directory if it doesn't exist
+        File uploadsDir = new File(UPLOADS_DIR);
+        if (!uploadsDir.exists()) {
+            uploadsDir.mkdirs();
+        }
+        // Load existing uploaded files
+        loadReceivedFiles();
+
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         // Context for the root path (UI)
@@ -94,7 +109,17 @@ public class LanCast {
         // API to verify PIN
         server.createContext("/api/verify-pin", new PinVerifyHandler());
 
-        server.setExecutor(null); // creates a default executor
+        // API to upload files
+        server.createContext("/api/upload", new FileUploadHandler());
+
+        // API to get list of received files
+        server.createContext("/api/received-files", new ReceivedFilesListHandler());
+
+        // Context to download received files
+        server.createContext("/received-files/", new ReceivedFileDownloadHandler());
+
+        // Use thread pool for better concurrent performance
+        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         server.start();
         System.out.println("LAN-Stream Core Server started on port " + PORT);
         printIpAddresses();
@@ -271,13 +296,15 @@ public class LanCast {
                         "attachment; filename=\"" + fileToSend.getName() + "\"");
                 t.sendResponseHeaders(200, fileToSend.length());
 
-                try (OutputStream os = t.getResponseBody();
-                        java.io.FileInputStream fis = new java.io.FileInputStream(fileToSend)) {
-                    byte[] buffer = new byte[8192];
+                try (java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(t.getResponseBody(), 262144);
+                        java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
+                                new java.io.FileInputStream(fileToSend), 262144)) {
+                    byte[] buffer = new byte[262144]; // 256KB buffer for fast transfers
                     int count;
-                    while ((count = fis.read(buffer)) != -1) {
-                        os.write(buffer, 0, count);
+                    while ((count = bis.read(buffer)) != -1) {
+                        bos.write(buffer, 0, count);
                     }
+                    bos.flush();
                 }
             } else {
                 sendResponse(t, 404, "File Not Found");
@@ -375,5 +402,241 @@ public class LanCast {
         if (userAgent.contains("Linux"))
             return "Linux";
         return "Unknown";
+    }
+
+    /**
+     * Load existing files from the uploads directory.
+     */
+    private static void loadReceivedFiles() {
+        receivedFiles.clear();
+        File uploadsDir = new File(UPLOADS_DIR);
+        if (uploadsDir.exists() && uploadsDir.isDirectory()) {
+            File[] files = uploadsDir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile()) {
+                        receivedFiles.add(f);
+                        System.out.println("Loaded received file: " + f.getName());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the list of received files (for GUI access).
+     */
+    public static List<File> getReceivedFiles() {
+        return new ArrayList<>(receivedFiles);
+    }
+
+    /**
+     * Handler for file uploads (POST /api/upload).
+     * Handles multipart/form-data file uploads.
+     */
+    static class FileUploadHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            if (!"POST".equals(t.getRequestMethod())) {
+                sendResponse(t, 405, "Method Not Allowed");
+                return;
+            }
+
+            String contentType = t.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.contains("multipart/form-data")) {
+                sendResponse(t, 400, "Content-Type must be multipart/form-data");
+                return;
+            }
+
+            // Extract boundary from Content-Type
+            String boundary = null;
+            for (String part : contentType.split(";")) {
+                part = part.trim();
+                if (part.startsWith("boundary=")) {
+                    boundary = part.substring("boundary=".length());
+                    // Remove quotes if present
+                    if (boundary.startsWith("\"") && boundary.endsWith("\"")) {
+                        boundary = boundary.substring(1, boundary.length() - 1);
+                    }
+                    break;
+                }
+            }
+
+            if (boundary == null) {
+                sendResponse(t, 400, "Missing boundary in Content-Type");
+                return;
+            }
+
+            try {
+                // Read the entire request body
+                InputStream is = t.getRequestBody();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[262144]; // 256KB buffer for fast uploads
+                int len;
+                while ((len = is.read(buffer)) != -1) {
+                    baos.write(buffer, 0, len);
+                }
+                byte[] body = baos.toByteArray();
+
+                // Parse multipart data
+                String bodyStr = new String(body, StandardCharsets.ISO_8859_1);
+                String[] parts = bodyStr.split("--" + boundary);
+
+                int uploadedCount = 0;
+                for (String part : parts) {
+                    if (part.trim().isEmpty() || part.equals("--"))
+                        continue;
+
+                    // Find the filename
+                    int filenameStart = part.indexOf("filename=\"");
+                    if (filenameStart == -1)
+                        continue;
+                    filenameStart += "filename=\"".length();
+                    int filenameEnd = part.indexOf("\"", filenameStart);
+                    if (filenameEnd == -1)
+                        continue;
+                    String filename = part.substring(filenameStart, filenameEnd);
+
+                    if (filename.isEmpty())
+                        continue;
+
+                    // Find the start of file data (after double CRLF)
+                    int dataStart = part.indexOf("\r\n\r\n");
+                    if (dataStart == -1)
+                        continue;
+                    dataStart += 4;
+
+                    // Find where in the original byte array this part starts
+                    String partHeader = bodyStr.substring(0, bodyStr.indexOf(part) + dataStart);
+                    int byteDataStart = partHeader.getBytes(StandardCharsets.ISO_8859_1).length;
+
+                    // Calculate the end (before the trailing CRLF)
+                    String afterPart = part.substring(dataStart);
+                    int byteDataEnd = byteDataStart + afterPart.getBytes(StandardCharsets.ISO_8859_1).length;
+                    // Remove trailing \r\n
+                    if (byteDataEnd >= 2) {
+                        byteDataEnd -= 2;
+                    }
+
+                    // Extract file bytes
+                    byte[] fileData = new byte[byteDataEnd - byteDataStart];
+                    System.arraycopy(body, byteDataStart, fileData, 0, fileData.length);
+
+                    // Save the file
+                    File uploadedFile = new File(UPLOADS_DIR, filename);
+                    try (FileOutputStream fos = new FileOutputStream(uploadedFile)) {
+                        fos.write(fileData);
+                    }
+
+                    // Add to received files list
+                    if (!receivedFiles.contains(uploadedFile)) {
+                        receivedFiles.add(uploadedFile);
+                    }
+
+                    // Log the upload
+                    String userAgent = t.getRequestHeaders().getFirst("User-Agent");
+                    new HistoryManager().logTransfer(
+                            t.getRemoteAddress().getAddress().getHostAddress(),
+                            "UPLOADED: " + filename,
+                            getDeviceType(userAgent));
+
+                    uploadedCount++;
+                    System.out.println("Received file: " + filename + " (" + fileData.length + " bytes)");
+                }
+
+                if (uploadedCount > 0) {
+                    t.getResponseHeaders().set("Content-Type", "application/json");
+                    sendResponse(t, 200, "{\"success\": true, \"count\": " + uploadedCount + "}");
+                } else {
+                    sendResponse(t, 400, "{\"success\": false, \"error\": \"No files uploaded\"}");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendResponse(t, 500, "{\"success\": false, \"error\": \"" + e.getMessage() + "\"}");
+            }
+        }
+    }
+
+    /**
+     * API Handler to return list of received files (GET /api/received-files).
+     */
+    static class ReceivedFilesListHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            if (!"GET".equals(t.getRequestMethod())) {
+                sendResponse(t, 405, "Method Not Allowed");
+                return;
+            }
+
+            StringBuilder json = new StringBuilder("[");
+            for (int i = 0; i < receivedFiles.size(); i++) {
+                File f = receivedFiles.get(i);
+                if (f.exists()) {
+                    json.append(String.format("{\"name\": \"%s\", \"size\": %d}", f.getName(), f.length()));
+                    if (i < receivedFiles.size() - 1) {
+                        json.append(",");
+                    }
+                }
+            }
+            json.append("]");
+
+            t.getResponseHeaders().set("Content-Type", "application/json");
+            sendResponse(t, 200, json.toString());
+        }
+    }
+
+    /**
+     * Handler for downloading received files (GET /received-files/{filename}).
+     */
+    static class ReceivedFileDownloadHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            if (!"GET".equals(t.getRequestMethod())) {
+                sendResponse(t, 405, "Method Not Allowed");
+                return;
+            }
+
+            String path = t.getRequestURI().getPath();
+            String filename = path.substring("/received-files/".length());
+
+            // URL decode the filename
+            filename = java.net.URLDecoder.decode(filename, StandardCharsets.UTF_8);
+
+            File fileToSend = null;
+            for (File f : receivedFiles) {
+                if (f.getName().equals(filename)) {
+                    fileToSend = f;
+                    break;
+                }
+            }
+
+            if (fileToSend != null && fileToSend.exists()) {
+                // Log transfer
+                String userAgent = t.getRequestHeaders().getFirst("User-Agent");
+                new HistoryManager().logTransfer(
+                        t.getRemoteAddress().getAddress().getHostAddress(),
+                        "RECEIVED: " + fileToSend.getName(),
+                        getDeviceType(userAgent));
+
+                t.getResponseHeaders().set("Content-Type", "application/octet-stream");
+                t.getResponseHeaders().set("Content-Disposition",
+                        "attachment; filename=\"" + fileToSend.getName() + "\"");
+                t.sendResponseHeaders(200, fileToSend.length());
+
+                try (java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(t.getResponseBody(), 262144);
+                        java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
+                                new java.io.FileInputStream(fileToSend), 262144)) {
+                    byte[] buffer = new byte[262144]; // 256KB buffer for fast transfers
+                    int count;
+                    while ((count = bis.read(buffer)) != -1) {
+                        bos.write(buffer, 0, count);
+                    }
+                    bos.flush();
+                }
+            } else {
+                sendResponse(t, 404, "File Not Found");
+            }
+        }
     }
 }

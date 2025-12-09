@@ -11,10 +11,10 @@ public class LanCastApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(LanCastApplication.class.getResource("lancast-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("LanCast");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
-        stage.centerOnScreen();
     }
 }
