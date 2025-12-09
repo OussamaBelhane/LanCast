@@ -184,18 +184,6 @@ LanCast/
 
 ---
 
-## 🔧 Building
-
-To build a standalone JAR:
-
-```bash
-mvn clean package
-```
-
-The JAR file will be created in the `target/` directory.
-
----
-
 ## 🐛 Troubleshooting
 
 ### "JavaFX runtime components are missing"
@@ -214,11 +202,6 @@ Gtk-Message: Failed to load module "colorreload-gtk-module"
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## � Authors
 
