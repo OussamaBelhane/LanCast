@@ -18,7 +18,6 @@
 - 🔒 **PIN Protection** - Secure your transfers with a 4-digit PIN
 - 📊 **Transfer History** - Track all file transfers with timestamps
 - 🎨 **Customizable Themes** - Dark/Light mode with multiple accent colors
-- 📦 **Automatic ZIP** - Multiple files are automatically zipped for download
 - 🌐 **Cross-Platform** - Works on Windows and Linux
 
 ---
