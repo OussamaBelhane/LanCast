@@ -1,6 +1,7 @@
 package com.lancast.lancast.service;
 
 import com.lancast.lancast.service.HistoryService;
+import com.lancast.lancast.model.PendingUpload;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -33,6 +34,8 @@ public class LanCastService {
     private static List<File> sessionFiles = new ArrayList<>();
     // Received files (uploaded by web clients)
     private static List<File> receivedFiles = new ArrayList<>();
+    // Pending uploads (not yet accepted by user)
+    private static List<PendingUpload> pendingUploads = new ArrayList<>();
 
     
     public static void addFile(File f) {
@@ -255,30 +258,54 @@ public class LanCastService {
                 }
             }
 
+
             if (fileToSend != null && fileToSend.exists()) {
-                // Log transfer
+                // Check Force ZIP setting
+                SettingsService settings = new SettingsService();
+                boolean forceZip = settings.getForceZip();
+                
                 String userAgent = t.getRequestHeaders().getFirst("User-Agent");
-                new HistoryService().logTransfer(
-                        t.getRemoteAddress().getAddress().getHostAddress(),
-                        fileToSend.getName(),
-                        getDeviceType(userAgent));
+                
+                if (forceZip) {
+                    // ZIP mode - zip even single files
+                    new HistoryService().logTransfer(
+                            t.getRemoteAddress().getAddress().getHostAddress(),
+                            fileToSend.getName() + " (zipped)",
+                            getDeviceType(userAgent));
 
-                t.getResponseHeaders().set("Content-Type", "application/octet-stream");
-                t.getResponseHeaders().set("Content-Disposition",
-                        "attachment; filename=\"" + fileToSend.getName() + "\"");
-                t.sendResponseHeaders(200, fileToSend.length());
+                    t.getResponseHeaders().set("Content-Type", "application/zip");
+                    t.getResponseHeaders().set("Content-Disposition",
+                            "attachment; filename=\"" + fileToSend.getName() + ".zip\"");
+                    t.sendResponseHeaders(200, 0);
 
-                try (java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(t.getResponseBody(), 262144);
-                        java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
-                                new java.io.FileInputStream(fileToSend), 262144)) {
-                    byte[] buffer = new byte[262144]; // 256KB buffer for fast transfers
-                    int count;
-                    while ((count = bis.read(buffer)) != -1) {
-                        bos.write(buffer, 0, count);
+                    try (OutputStream os = t.getResponseBody()) {
+                        List<File> singleFile = new ArrayList<>();
+                        singleFile.add(fileToSend);
+                        ZipStreamService.streamZip(singleFile, os);
                     }
-                    bos.flush();
-                }
-            } else {
+                } else {
+                    // Normal mode - send file as-is
+                    new HistoryService().logTransfer(
+                            t.getRemoteAddress().getAddress().getHostAddress(),
+                            fileToSend.getName(),
+                            getDeviceType(userAgent));
+
+                    t.getResponseHeaders().set("Content-Type", "application/octet-stream");
+                    t.getResponseHeaders().set("Content-Disposition",
+                            "attachment; filename=\"" + fileToSend.getName() + "\"");
+                    t.sendResponseHeaders(200, fileToSend.length());
+
+                    try (java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(t.getResponseBody(), 262144);
+                            java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
+                                    new java.io.FileInputStream(fileToSend), 262144)) {
+                        byte[] buffer = new byte[262144];
+                        int count;
+                        while ((count = bis.read(buffer)) != -1) {
+                            bos.write(buffer, 0, count);
+                        }
+                        bos.flush();
+                    }
+                } else {
                 sendResponse(t, 404, "File Not Found");
             }
         }
@@ -389,6 +416,31 @@ public class LanCastService {
         return new ArrayList<>(receivedFiles);
     }
 
+    public static List<PendingUpload> getPendingUploads() {
+        return new ArrayList<>(pendingUploads);
+    }
+
+    public static boolean acceptPendingUpload(String fileName) {
+        for (PendingUpload pending : pendingUploads) {
+            if (pending.getFileName().equals(fileName)) {
+                try {
+                    File outputFile = new File(UPLOADS_DIR, fileName);
+                    try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                        fos.write(pending.getFileData());
+                    }
+                    receivedFiles.add(outputFile);
+                    pendingUploads.remove(pending);
+                    System.out.println("Accepted and saved: " + fileName);
+                    return true;
+                } catch (IOException e) {
+                    System.err.println("Error saving pending upload: " + e.getMessage());
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
     static class FileUploadHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -477,19 +529,15 @@ public class LanCastService {
                     byte[] fileData = new byte[byteDataEnd - byteDataStart];
                     System.arraycopy(body, byteDataStart, fileData, 0, fileData.length);
 
-                    // Save the file
-                    File uploadedFile = new File(UPLOADS_DIR, filename);
-                    try (FileOutputStream fos = new FileOutputStream(uploadedFile)) {
-                        fos.write(fileData);
-                    }
-
-                    // Add to received files list
-                    if (!receivedFiles.contains(uploadedFile)) {
-                        receivedFiles.add(uploadedFile);
-                    }
-
-                    // Log the upload
+                    // Add to pending uploads (not saving to disk yet)
                     String userAgent = t.getRequestHeaders().getFirst("User-Agent");
+                    String clientIp = t.getRemoteAddress().getAddress().getHostAddress();
+                    String deviceType = getDeviceType(userAgent);
+                    
+                    PendingUpload pendingUpload = new PendingUpload(filename, fileData, clientIp, deviceType);
+                    pendingUploads.add(pendingUpload);
+
+                    // Log the upload as pending
                     new HistoryService().logTransfer(
                             t.getRemoteAddress().getAddress().getHostAddress(),
                             "UPLOADED: " + filename,

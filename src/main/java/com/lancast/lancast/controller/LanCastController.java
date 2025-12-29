@@ -548,24 +548,61 @@ public class LanCastController {
 
     private void loadReceivedFiles() {
         List<File> received = LanCastService.getReceivedFiles();
-        receivedFilesListView.setItems(FXCollections.observableArrayList(received));
-        receivedCountLabel.setText(received.size() + " files");
+        List<com.lancast.lancast.model.PendingUpload> pending = LanCastService.getPendingUploads();
+        
+        ObservableList<String> displayList = FXCollections.observableArrayList();
+        for (com.lancast.lancast.model.PendingUpload p : pending) {
+            displayList.add("PENDING|" + p.getFileName());
+        }
+        for (File f : received) {
+            displayList.add("DOWNLOADED|" + f.getName());
+        }
+        
+        receivedFilesListView.setItems(displayList);
+        receivedCountLabel.setText((pending.size() + received.size()) + " files");
 
-        receivedFilesListView.setCellFactory(lv -> new ListCell<File>() {
+        receivedFilesListView.setCellFactory(lv -> new ListCell<String>() {
             @Override
-            protected void updateItem(File item, boolean empty) {
+            protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
                 } else {
+                    String[] parts = item.split("\\|", 2);
+                    String status = parts[0];
+                    String fileName = parts[1];
+                    
                     HBox hbox = new HBox(8);
                     hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                    Label icon = new Label("📥");
-                    icon.setStyle("-fx-font-size: 14px;");
-                    Label name = new Label(item.getName() + " (" + formatFileSize(item.length()) + ")");
-                    name.setStyle("-fx-font-size: 11px; -fx-text-fill: -text-primary;");
-                    hbox.getChildren().addAll(icon, name);
+                    
+                    Label icon;
+                    Label name;
+                    
+                    if ("PENDING".equals(status)) {
+                        icon = new Label("⏳");
+                        icon.setStyle("-fx-font-size: 14px;");
+                        name = new Label(fileName);
+                        name.setStyle("-fx-font-size: 11px; -fx-text-fill: -accent-color; -fx-font-weight: bold;");
+                        
+                        Button downloadBtn = new Button("📥");
+                        downloadBtn.setStyle("-fx-background-color: -accent-color; -fx-text-fill: white; " +
+                                           "-fx-font-size: 12px; -fx-cursor: hand; -fx-padding: 4 8;");
+                        downloadBtn.setOnAction(e -> {
+                            if (LanCastService.acceptPendingUpload(fileName)) {
+                                loadReceivedFiles();
+                            }
+                        });
+                        
+                        hbox.getChildren().addAll(icon, name, downloadBtn);
+                    } else {
+                        icon = new Label("✅");
+                        icon.setStyle("-fx-font-size: 14px;");
+                        name = new Label(fileName);
+                        name.setStyle("-fx-font-size: 11px; -fx-text-fill: -text-primary;");
+                        hbox.getChildren().addAll(icon, name);
+                    }
+                    
                     setGraphic(hbox);
                 }
             }
