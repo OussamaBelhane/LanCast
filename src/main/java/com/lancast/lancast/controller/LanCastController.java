@@ -70,7 +70,7 @@ public class LanCastController {
     @FXML
     private VBox receiveView;
     @FXML
-    private ListView<File> receivedFilesListView;
+    private ListView<String> receivedFilesListView;
     @FXML
     private Label receivedCountLabel;
     @FXML

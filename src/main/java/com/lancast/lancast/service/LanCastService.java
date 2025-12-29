@@ -305,7 +305,8 @@ public class LanCastService {
                         }
                         bos.flush();
                     }
-                } else {
+                }
+            } else {
                 sendResponse(t, 404, "File Not Found");
             }
         }
