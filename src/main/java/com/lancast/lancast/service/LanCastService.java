@@ -38,35 +38,21 @@ public class LanCastService {
     // Received files (uploaded by web clients)
     private static List<File> receivedFiles = new ArrayList<>();
 
-    // --- Control Methods for GUI ---
-
-    /**
-     * Adds a file to the current session.
-     * 
-     * @param f The file to add.
-     */
+    
     public static void addFile(File f) {
         if (f != null && f.exists()) {
             sessionFiles.add(f);
             System.out.println("Added to session: " + f.getName());
         }
     }
-
-    /**
-     * Removes a file from the current session.
-     * 
-     * @param f The file to remove.
-     */
+    
     public static void removeFile(File f) {
         if (f != null) {
             sessionFiles.remove(f);
             System.out.println("Removed from session: " + f.getName());
         }
     }
-
-    /**
-     * Clears the current session.
-     */
+    
     public static void resetSession() {
         sessionFiles.clear();
         System.out.println("Session cleared.");

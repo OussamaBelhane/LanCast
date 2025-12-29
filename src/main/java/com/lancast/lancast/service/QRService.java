@@ -10,20 +10,9 @@ import javafx.scene.image.Image;
 
 import java.awt.image.BufferedImage;
 
-/**
- * Service to generate QR codes as JavaFX Images.
- */
+
 public class QRService {
 
-    /**
-     * Generates a QR Code image for the given text.
-     *
-     * @param text   The text to encode (e.g., URL).
-     * @param width  The width of the QR code.
-     * @param height The height of the QR code.
-     * @return A JavaFX Image containing the QR code.
-     * @throws WriterException If an error occurs during generation.
-     */
     public Image generateQRCode(String text, int width, int height) throws WriterException {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
