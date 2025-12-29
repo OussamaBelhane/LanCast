@@ -24,10 +24,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-/**
- * The Core Engine of LAN-Stream.
- * Handles HTTP requests and manages file transfers.
- */
 public class LanCastService {
 
     private static final int PORT = 8000;
@@ -192,10 +188,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * Handler for the root path (GET /).
-     * Serves the HTML page.
-     */
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -218,9 +210,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * API Handler to return list of files (GET /api/files).
-     */
     static class FileListHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -244,9 +233,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * Handler for individual file downloads (GET /files/{filename}).
-     */
     static class FileDownloadHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -298,10 +284,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * Handler for the bulk download path (POST /download).
-     * Zips all files.
-     */
     static class DownloadHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -345,9 +327,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * API Handler to verify PIN (POST /api/verify-pin).
-     */
     static class PinVerifyHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -390,9 +369,6 @@ public class LanCastService {
         return "Unknown";
     }
 
-    /**
-     * Load existing files from the uploads directory.
-     */
     private static void loadReceivedFiles() {
         receivedFiles.clear();
         File uploadsDir = new File(UPLOADS_DIR);
@@ -409,17 +385,10 @@ public class LanCastService {
         }
     }
 
-    /**
-     * Get the list of received files (for GUI access).
-     */
     public static List<File> getReceivedFiles() {
         return new ArrayList<>(receivedFiles);
     }
 
-    /**
-     * Handler for file uploads (POST /api/upload).
-     * Handles multipart/form-data file uploads.
-     */
     static class FileUploadHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -544,9 +513,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * API Handler to return list of received files (GET /api/received-files).
-     */
     static class ReceivedFilesListHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
@@ -572,9 +538,6 @@ public class LanCastService {
         }
     }
 
-    /**
-     * Handler for downloading received files (GET /received-files/{filename}).
-     */
     static class ReceivedFileDownloadHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {

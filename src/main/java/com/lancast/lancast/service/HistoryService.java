@@ -12,21 +12,11 @@ public class HistoryService {
 
     private static final String DB_URL = "jdbc:sqlite:lancast.db";
 
-    /**
-     * Initializes the HistoryService.
-     * Note: The transfer_logs table is created automatically by the database schema.
-     */
     public HistoryService() {
         // Table is created automatically
     }
 
-    /**
-     * Logs a file transfer to the database.
-     * 
-     * @param ip The client's IP address
-     * @param fileName The name of the transferred file
-     * @param deviceType The type of device (e.g., "Android 13", "Windows 11")
-     */
+    // save transfer to database
     public void logTransfer(String ip, String fileName, String deviceType) {
         String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type) VALUES (?, ?, ?)";
 
@@ -38,7 +28,7 @@ public class HistoryService {
             pstmt.setString(3, deviceType);
             pstmt.executeUpdate();
 
-            // Transfer logged successfully
+
 
         } catch (SQLException e) {
             System.err.println("Error logging transfer: " + e.getMessage());
@@ -46,11 +36,6 @@ public class HistoryService {
         }
     }
 
-    /**
-     * Retrieves all transfer logs from the database, ordered by most recent first.
-     * 
-     * @return List of TransferLog objects
-     */
     public List<TransferLog> getAllLogs() {
         List<TransferLog> logs = new ArrayList<>();
         String sql = "SELECT * FROM transfer_logs ORDER BY id DESC";
@@ -76,10 +61,6 @@ public class HistoryService {
         return logs;
     }
 
-    /**
-     * Prints all transfer logs to the console.
-     * Useful for debugging purposes.
-     */
     public void printAllLogs() {
         List<TransferLog> logs = getAllLogs();
         if (logs.isEmpty()) {
@@ -89,11 +70,6 @@ public class HistoryService {
         }
     }
 
-    /**
-     * Deletes a specific transfer log by its ID.
-     * 
-     * @param id The ID of the log to delete
-     */
     public void deleteLog(int id) {
         String sql = "DELETE FROM transfer_logs WHERE id = ?";
 
@@ -111,9 +87,6 @@ public class HistoryService {
         }
     }
 
-    /**
-     * Clears all transfer logs from the database.
-     */
     public void clearLogs() {
         String sql = "DELETE FROM transfer_logs";
 
@@ -156,41 +129,18 @@ public class HistoryService {
         return results;
     }
 
-    /**
-     * Searches for transfer logs by client IP address.
-     * 
-     * @param ip The IP address to search for (supports partial matches)
-     * @return List of matching TransferLog objects
-     */
     public List<TransferLog> searchByIP(String ip) {
         return search("client_ip", ip);
     }
 
-    /**
-     * Searches for transfer logs by file name.
-     * 
-     * @param file The file name to search for (supports partial matches)
-     * @return List of matching TransferLog objects
-     */
     public List<TransferLog> searchByFile(String file) {
         return search("file_name", file);
     }
 
-    /**
-     * Searches for transfer logs by device type.
-     * 
-     * @param device The device type to search for (supports partial matches)
-     * @return List of matching TransferLog objects
-     */
     public List<TransferLog> searchByDevice(String device) {
         return search("device_type", device);
     }
 
-    /**
-     * Exports all transfer logs to a text file.
-     * 
-     * @param file The path to the output text file
-     */
     public void exportToText(String file) {
         try (FileWriter fw = new FileWriter(file)) {
             for (TransferLog log : getAllLogs())
@@ -202,11 +152,6 @@ public class HistoryService {
         }
     }
 
-    /**
-     * Exports all transfer logs to a JSON file.
-     * 
-     * @param file The path to the output JSON file
-     */
     public void exportToJSON(String file) {
         try (FileWriter fw = new FileWriter(file)) {
             fw.write("[\n");

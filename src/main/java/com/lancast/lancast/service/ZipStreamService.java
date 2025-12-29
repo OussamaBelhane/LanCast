@@ -10,20 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- * Utility class for managing file zipping operations.
- * Designed for high-performance streaming directly to the network without temporary files.
- */
 public class ZipStreamService {
 
-    /**
-     * Streams a list of files as a ZIP archive directly to the provided OutputStream.
-     * This method avoids creating a temporary ZIP file on disk, improving performance and reducing I/O.
-     *
-     * @param files The list of files to be compressed and streamed.
-     * @param out   The OutputStream to write the ZIP data to (typically the network stream).
-     * @throws IOException If an I/O error occurs during zipping or streaming.
-     */
     public static void streamZip(List<File> files, OutputStream out) throws IOException {
         // Use BufferedOutputStream for efficiency
         try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(out))) {
