@@ -1,4 +1,4 @@
-package com.lancast.lancast.database;
+package com.lancast.lancast.service;
 
 import java.sql.*;
 import java.io.FileWriter;
@@ -6,35 +6,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoryManager {
+import com.lancast.lancast.model.TransferLog;
+
+public class HistoryService {
 
     private static final String DB_URL = "jdbc:sqlite:lancast.db";
 
-    public HistoryManager() {
-        createTable();
+    /**
+     * Initializes the HistoryService.
+     * Note: The transfer_logs table is created automatically by the database schema.
+     */
+    public HistoryService() {
+        // Table is created automatically
     }
 
-    // Create table if not exists
-    private void createTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS transfer_logs (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "client_ip TEXT, " +
-                "file_name TEXT, " +
-                "device_type TEXT, " +
-                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP" +
-                ");";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-
-            stmt.execute(sql);
-
-        } catch (SQLException e) {
-            System.out.println("Error creating table: " + e.getMessage());
-        }
-    }
-
-    // Insert a transfer record
+    /**
+     * Logs a file transfer to the database.
+     * 
+     * @param ip The client's IP address
+     * @param fileName The name of the transferred file
+     * @param deviceType The type of device (e.g., "Android 13", "Windows 11")
+     */
     public void logTransfer(String ip, String fileName, String deviceType) {
         String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type) VALUES (?, ?, ?)";
 
@@ -46,14 +38,19 @@ public class HistoryManager {
             pstmt.setString(3, deviceType);
             pstmt.executeUpdate();
 
-            System.out.println("Logged transfer: " + ip);
+            // Transfer logged successfully
 
         } catch (SQLException e) {
-            System.out.println("Error inserting log: " + e.getMessage());
+            System.err.println("Error logging transfer: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // Read all logs
+    /**
+     * Retrieves all transfer logs from the database, ordered by most recent first.
+     * 
+     * @return List of TransferLog objects
+     */
     public List<TransferLog> getAllLogs() {
         List<TransferLog> logs = new ArrayList<>();
         String sql = "SELECT * FROM transfer_logs ORDER BY id DESC";
@@ -72,18 +69,31 @@ public class HistoryManager {
             }
 
         } catch (SQLException e) {
-            System.out.println("Error reading logs: " + e.getMessage());
+            System.err.println("Error reading logs: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return logs;
     }
 
-    // Print all logs to console
+    /**
+     * Prints all transfer logs to the console.
+     * Useful for debugging purposes.
+     */
     public void printAllLogs() {
-        getAllLogs().forEach(System.out::println);
+        List<TransferLog> logs = getAllLogs();
+        if (logs.isEmpty()) {
+            System.out.println("No transfer logs found.");
+        } else {
+            logs.forEach(System.out::println);
+        }
     }
 
-    // Delete by ID
+    /**
+     * Deletes a specific transfer log by its ID.
+     * 
+     * @param id The ID of the log to delete
+     */
     public void deleteLog(int id) {
         String sql = "DELETE FROM transfer_logs WHERE id = ?";
 
@@ -93,14 +103,17 @@ public class HistoryManager {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
 
-            System.out.println("Deleted log id: " + id);
+            // Log deleted successfully
 
         } catch (SQLException e) {
-            System.out.println("Error deleting log: " + e.getMessage());
+            System.err.println("Error deleting log: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // Clear all logs
+    /**
+     * Clears all transfer logs from the database.
+     */
     public void clearLogs() {
         String sql = "DELETE FROM transfer_logs";
 
@@ -108,10 +121,11 @@ public class HistoryManager {
                 Statement stmt = conn.createStatement()) {
 
             stmt.execute(sql);
-            System.out.println("All logs cleared.");
+            // All logs cleared successfully
 
         } catch (SQLException e) {
-            System.out.println("Error clearing logs: " + e.getMessage());
+            System.err.println("Error clearing logs: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -136,35 +150,63 @@ public class HistoryManager {
             }
 
         } catch (SQLException e) {
-            System.out.println("Search error: " + e.getMessage());
+            System.err.println("Search error: " + e.getMessage());
+            e.printStackTrace();
         }
         return results;
     }
 
+    /**
+     * Searches for transfer logs by client IP address.
+     * 
+     * @param ip The IP address to search for (supports partial matches)
+     * @return List of matching TransferLog objects
+     */
     public List<TransferLog> searchByIP(String ip) {
         return search("client_ip", ip);
     }
 
+    /**
+     * Searches for transfer logs by file name.
+     * 
+     * @param file The file name to search for (supports partial matches)
+     * @return List of matching TransferLog objects
+     */
     public List<TransferLog> searchByFile(String file) {
         return search("file_name", file);
     }
 
+    /**
+     * Searches for transfer logs by device type.
+     * 
+     * @param device The device type to search for (supports partial matches)
+     * @return List of matching TransferLog objects
+     */
     public List<TransferLog> searchByDevice(String device) {
         return search("device_type", device);
     }
 
-    // Export to text
+    /**
+     * Exports all transfer logs to a text file.
+     * 
+     * @param file The path to the output text file
+     */
     public void exportToText(String file) {
         try (FileWriter fw = new FileWriter(file)) {
             for (TransferLog log : getAllLogs())
                 fw.write(log + "\n");
             System.out.println("Exported to " + file);
         } catch (IOException e) {
-            System.out.println("Error exporting text: " + e.getMessage());
+            System.err.println("Error exporting to text: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // Export to JSON
+    /**
+     * Exports all transfer logs to a JSON file.
+     * 
+     * @param file The path to the output JSON file
+     */
     public void exportToJSON(String file) {
         try (FileWriter fw = new FileWriter(file)) {
             fw.write("[\n");
@@ -172,29 +214,19 @@ public class HistoryManager {
             for (int i = 0; i < logs.size(); i++) {
                 TransferLog log = logs.get(i);
                 fw.write("  {\n");
-                fw.write("    \"id\": " + log.id + ",\n");
-                fw.write("    \"client_ip\": \"" + log.clientIp + "\",\n");
-                fw.write("    \"file_name\": \"" + log.fileName + "\",\n");
-                fw.write("    \"device_type\": \"" + log.deviceType + "\",\n");
-                fw.write("    \"timestamp\": \"" + log.timestamp + "\"\n");
+                fw.write("    \"id\": " + log.getId() + ",\n");
+                fw.write("    \"client_ip\": \"" + log.getClientIp() + "\",\n");
+                fw.write("    \"file_name\": \"" + log.getFileName() + "\",\n");
+                fw.write("    \"device_type\": \"" + log.getDeviceType() + "\",\n");
+                fw.write("    \"timestamp\": \"" + log.getTimestamp() + "\"\n");
                 fw.write("  }" + (i < logs.size() - 1 ? "," : "") + "\n");
             }
             fw.write("]");
             System.out.println("Exported to " + file);
 
         } catch (IOException e) {
-            System.out.println("Error exporting JSON: " + e.getMessage());
+            System.err.println("Error exporting to JSON: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    // Test
-    public static void main(String[] args) {
-        HistoryManager db = new HistoryManager();
-
-        db.logTransfer("192.168.1.10", "vacation.zip", "Android 13");
-        db.logTransfer("192.168.1.55", "notes.pdf", "Windows 11");
-
-        db.printAllLogs();
-        System.out.println("Database test complete.");
     }
 }

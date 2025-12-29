@@ -1,4 +1,4 @@
-package com.lancast.lancast.core;
+package com.lancast.lancast.service;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -14,7 +14,7 @@ import java.util.zip.ZipOutputStream;
  * Utility class for managing file zipping operations.
  * Designed for high-performance streaming directly to the network without temporary files.
  */
-public class ZipStreamManager {
+public class ZipStreamService {
 
     /**
      * Streams a list of files as a ZIP archive directly to the provided OutputStream.

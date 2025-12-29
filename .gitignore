@@ -37,3 +37,20 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### LanCast Application ###
+# Database files (contains your transfer history)
+*.db
+*.db-journal
+lancast.db
+
+# User settings and configuration
+settings.properties
+
+# Uploaded files folder (received files)
+uploads/
+
+# Generated files
+qrcode.png
+build-output.txt
+*.log

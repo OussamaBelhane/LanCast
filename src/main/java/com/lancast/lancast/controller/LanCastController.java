@@ -1,6 +1,6 @@
-package com.lancast.lancast;
+package com.lancast.lancast.controller;
 
-import com.lancast.lancast.core.LanCast;
+import com.lancast.lancast.service.LanCastService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,8 +26,8 @@ import javafx.util.Callback;
 import java.io.File;
 import java.util.List;
 
-import com.lancast.lancast.database.HistoryManager;
-import com.lancast.lancast.database.TransferLog;
+import com.lancast.lancast.service.HistoryService;
+import com.lancast.lancast.model.TransferLog;
 
 public class LanCastController {
 
@@ -113,7 +113,7 @@ public class LanCastController {
     private Button accentOrangeBtn;
 
     private ObservableList<File> selectedFiles;
-    private com.lancast.lancast.core.SettingsManager settingsManager;
+    private com.lancast.lancast.service.SettingsService settingsManager;
     private boolean isServerRunning = false;
     private boolean isDarkMode = true;
     private String currentAccent = "purple";
@@ -124,7 +124,7 @@ public class LanCastController {
         fileListView.setItems(selectedFiles);
         setupFileListCellFactory();
 
-        settingsManager = new com.lancast.lancast.core.SettingsManager();
+        settingsManager = new com.lancast.lancast.service.SettingsService();
         refreshConnectionInfo();
         updatePinDisplay();
         setupDragAndDrop();
@@ -179,7 +179,7 @@ public class LanCastController {
                                     "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-cursor: hand;"));
                             removeBtn.setOnAction(event -> {
                                 selectedFiles.remove(item);
-                                LanCast.removeFile(item);
+                                LanCastService.removeFile(item);
                                 updateStatus();
                             });
 
@@ -320,13 +320,13 @@ public class LanCastController {
     }
 
     private void loadHistoryData() {
-        HistoryManager hm = new HistoryManager();
+        HistoryService hm = new HistoryService();
         List<TransferLog> logs = hm.getAllLogs();
         historyTable.setItems(FXCollections.observableArrayList(logs));
     }
 
     private void refreshConnectionInfo() {
-        String fullUrl = LanCast.getIpAddress(); // Already returns "http://IP:PORT/"
+        String fullUrl = LanCastService.getIpAddress(); // Already returns "http://IP:PORT/"
 
         // Extract just the IP for the short display
         String ipOnly = fullUrl.replace("http://", "").replace("/", "");
@@ -337,7 +337,7 @@ public class LanCastController {
             urlLabel.setText(fullUrl);
 
         try {
-            com.lancast.lancast.core.QRService qrService = new com.lancast.lancast.core.QRService();
+            com.lancast.lancast.service.QRService qrService = new com.lancast.lancast.service.QRService();
             javafx.scene.image.Image qrImage = qrService.generateQRCode(fullUrl, 200, 200);
             qrCodeImageView.setImage(qrImage);
             if (qrPlaceholderLabel != null)
@@ -415,7 +415,7 @@ public class LanCastController {
         for (File file : files) {
             if (!selectedFiles.contains(file)) {
                 selectedFiles.add(file);
-                LanCast.addFile(file);
+                LanCastService.addFile(file);
             }
         }
         updateStatus();
@@ -456,7 +456,7 @@ public class LanCastController {
     @FXML
     private void handleClear() {
         selectedFiles.clear();
-        LanCast.resetSession();
+        LanCastService.resetSession();
         updateStatus();
     }
 
@@ -464,7 +464,7 @@ public class LanCastController {
     private void handleStart() {
         if (!isServerRunning) {
             try {
-                LanCast.startServer();
+                LanCastService.startServer();
                 isServerRunning = true;
                 startBtn.setText("⏹ Stop");
                 startBtn.getStyleClass().remove("server-button-start");
@@ -475,7 +475,7 @@ public class LanCastController {
                 e.printStackTrace();
             }
         } else {
-            LanCast.stopServer();
+            LanCastService.stopServer();
             isServerRunning = false;
             startBtn.setText("▶ Start");
             startBtn.getStyleClass().remove("server-button-stop");
@@ -537,7 +537,7 @@ public class LanCastController {
     }
 
     private void loadReceivedFiles() {
-        List<File> received = LanCast.getReceivedFiles();
+        List<File> received = LanCastService.getReceivedFiles();
         receivedFilesListView.setItems(FXCollections.observableArrayList(received));
         receivedCountLabel.setText(received.size() + " files");
 

@@ -1,6 +1,6 @@
-package com.lancast.lancast.core;
+package com.lancast.lancast.service;
 
-import com.lancast.lancast.database.HistoryManager;
+import com.lancast.lancast.service.HistoryService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -28,7 +28,7 @@ import java.util.List;
  * The Core Engine of LAN-Stream.
  * Handles HTTP requests and manages file transfers.
  */
-public class LanCast {
+public class LanCastService {
 
     private static final int PORT = 8000;
     private static final String UPLOADS_DIR = "uploads";
@@ -286,7 +286,7 @@ public class LanCast {
             if (fileToSend != null && fileToSend.exists()) {
                 // Log transfer
                 String userAgent = t.getRequestHeaders().getFirst("User-Agent");
-                new HistoryManager().logTransfer(
+                new HistoryService().logTransfer(
                         t.getRemoteAddress().getAddress().getHostAddress(),
                         fileToSend.getName(),
                         getDeviceType(userAgent));
@@ -332,7 +332,7 @@ public class LanCast {
             String userAgent = t.getRequestHeaders().getFirst("User-Agent");
             String deviceType = getDeviceType(userAgent);
             String clientIp = t.getRemoteAddress().getAddress().getHostAddress();
-            HistoryManager historyManager = new HistoryManager();
+            HistoryService historyManager = new HistoryService();
 
             // Log each file individually
             for (File f : sessionFiles) {
@@ -344,7 +344,7 @@ public class LanCast {
             t.sendResponseHeaders(200, 0); // Chunked encoding
 
             try (OutputStream os = t.getResponseBody()) {
-                ZipStreamManager.streamZip(sessionFiles, os);
+                ZipStreamService.streamZip(sessionFiles, os);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -378,7 +378,7 @@ public class LanCast {
 
             // Get the actual PIN from settings
             // We create a new instance to ensure we get the latest value from the file
-            String actualPin = new com.lancast.lancast.core.SettingsManager().getPin();
+            String actualPin = new com.lancast.lancast.service.SettingsService().getPin();
 
             if (actualPin.equals(submittedPin.trim())) {
                 sendResponse(t, 200, "OK");
@@ -535,7 +535,7 @@ public class LanCast {
 
                     // Log the upload
                     String userAgent = t.getRequestHeaders().getFirst("User-Agent");
-                    new HistoryManager().logTransfer(
+                    new HistoryService().logTransfer(
                             t.getRemoteAddress().getAddress().getHostAddress(),
                             "UPLOADED: " + filename,
                             getDeviceType(userAgent));
@@ -614,7 +614,7 @@ public class LanCast {
             if (fileToSend != null && fileToSend.exists()) {
                 // Log transfer
                 String userAgent = t.getRequestHeaders().getFirst("User-Agent");
-                new HistoryManager().logTransfer(
+                new HistoryService().logTransfer(
                         t.getRemoteAddress().getAddress().getHostAddress(),
                         "RECEIVED: " + fileToSend.getName(),
                         getDeviceType(userAgent));

@@ -1,4 +1,4 @@
-package com.lancast.lancast.core;
+package com.lancast.lancast.service;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;

@@ -1,11 +1,11 @@
-package com.lancast.lancast.core;
+package com.lancast.lancast.service;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class SettingsManager {
+public class SettingsService {
     private static final String SETTINGS_FILE = "settings.properties";
     private static final String KEY_PIN = "security_pin";
     private static final String KEY_THEME = "app_theme";
@@ -16,7 +16,7 @@ public class SettingsManager {
 
     private Properties properties;
 
-    public SettingsManager() {
+    public SettingsService() {
         properties = new Properties();
         loadSettings();
     }
