@@ -111,6 +111,8 @@ public class LanCastController {
     private Button accentGreenBtn;
     @FXML
     private Button accentOrangeBtn;
+    @FXML
+    private Button forceZipToggleBtn;
 
     private ObservableList<File> selectedFiles;
     private com.lancast.lancast.service.SettingsService settingsManager;
@@ -127,6 +129,7 @@ public class LanCastController {
         settingsManager = new com.lancast.lancast.service.SettingsService();
         refreshConnectionInfo();
         updatePinDisplay();
+        updateForceZipDisplay();
         setupDragAndDrop();
         setupHistoryTable();
         setupNavIcons();
@@ -205,10 +208,7 @@ public class LanCastController {
         btn.setGraphic(iconLabel);
     }
 
-    // ============================================
-    // THEME HANDLING
-    // ============================================
-
+    
     private void loadSavedTheme() {
         String savedMode = settingsManager.getTheme();
         String savedAccent = settingsManager.getAccentColor();
@@ -279,6 +279,13 @@ public class LanCastController {
     }
 
     @FXML
+    private void handleForceZipToggle() {
+        boolean currentState = settingsManager.getForceZip();
+        settingsManager.setForceZip(!currentState);
+        updateForceZipDisplay();
+    }
+
+    @FXML
     private void handleAccentPurple() {
         currentAccent = "purple";
         applyTheme();
@@ -308,10 +315,7 @@ public class LanCastController {
         applyTheme();
     }
 
-    // ============================================
-    // HISTORY & CONNECTION
-    // ============================================
-
+    
     private void setupHistoryTable() {
         timeCol.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         deviceCol.setCellValueFactory(new PropertyValueFactory<>("deviceType"));
@@ -353,6 +357,12 @@ public class LanCastController {
             pinLabel.setText(pin);
         if (settingsPinLabel != null)
             settingsPinLabel.setText(pin);
+    }
+
+    private void updateForceZipDisplay() {
+        boolean forceZip = settingsManager.getForceZip();
+        if (forceZipToggleBtn != null)
+            forceZipToggleBtn.setText(forceZip ? "ON" : "OFF");
     }
 
     @FXML

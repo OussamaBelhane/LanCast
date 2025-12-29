@@ -234,6 +234,18 @@
                   </HBox>
                </VBox>
                
+               <!-- Transfer Options -->
+               <VBox styleClass="settings-section" spacing="15" style="-fx-max-width: 450px;">
+                  <Label text="📦 Transfer Options" styleClass="settings-title"/>
+                  <HBox alignment="CENTER_LEFT" spacing="15">
+                     <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Force ZIP" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -text-primary;"/>
+                        <Label text="Always zip transfers (even single files)" styleClass="settings-description"/>
+                     </VBox>
+                     <Button fx:id="forceZipToggleBtn" text="OFF" styleClass="mode-toggle" onAction="#handleForceZipToggle"/>
+                  </HBox>
+               </VBox>
+               
                <!-- About -->
                <VBox styleClass="settings-section" spacing="10" style="-fx-max-width: 450px;">
                   <Label text="ℹ️ About" styleClass="settings-title"/>

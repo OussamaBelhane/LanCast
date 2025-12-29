@@ -10,6 +10,7 @@ public class SettingsService {
     private static final String KEY_PIN = "security_pin";
     private static final String KEY_THEME = "app_theme";
     private static final String KEY_ACCENT = "accent_color";
+    private static final String KEY_FORCE_ZIP = "force_zip";
     private static final String DEFAULT_PIN = "1234";
     private static final String DEFAULT_THEME = "dark";
     private static final String DEFAULT_ACCENT = "purple";
@@ -61,6 +62,15 @@ public class SettingsService {
 
     public void setAccentColor(String accent) {
         properties.setProperty(KEY_ACCENT, accent);
+        saveSettings();
+    }
+
+    public boolean getForceZip() {
+        return Boolean.parseBoolean(properties.getProperty(KEY_FORCE_ZIP, "false"));
+    }
+
+    public void setForceZip(boolean forceZip) {
+        properties.setProperty(KEY_FORCE_ZIP, String.valueOf(forceZip));
         saveSettings();
     }
 }
