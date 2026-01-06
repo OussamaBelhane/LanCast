@@ -1,6 +1,6 @@
 package com.lancast.lancast.dao;
 
-import com.lancast.lancast.model.User;
+import com.lancast.lancast.models.User;
 
 /**
  * Data Access Object interface for User entities.

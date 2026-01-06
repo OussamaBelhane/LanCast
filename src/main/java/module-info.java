@@ -9,11 +9,12 @@ module com.lancast.lancast {
     requires java.desktop;
 
     opens com.lancast.lancast to javafx.fxml;
-    opens com.lancast.lancast.controller to javafx.fxml;
-    opens com.lancast.lancast.model to javafx.base, javafx.fxml;
+    opens com.lancast.lancast.controllers to javafx.fxml;
+    opens com.lancast.lancast.models to javafx.base, javafx.fxml;
 
     exports com.lancast.lancast;
-    exports com.lancast.lancast.controller;
-    exports com.lancast.lancast.model;
-    exports com.lancast.lancast.service;
+    exports com.lancast.lancast.controllers;
+    exports com.lancast.lancast.models;
+    exports com.lancast.lancast.services;
+    exports com.lancast.lancast.dao;
 }

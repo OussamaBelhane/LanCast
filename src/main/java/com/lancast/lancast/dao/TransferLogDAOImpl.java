@@ -1,6 +1,6 @@
 package com.lancast.lancast.dao;
 
-import com.lancast.lancast.model.TransferLog;
+import com.lancast.lancast.models.TransferLog;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
