@@ -10,32 +10,6 @@ import java.sql.*;
 public class UserDAOImpl implements UserDAO {
 
     private static final String DB_URL = "jdbc:sqlite:lancast.db";
-    private static boolean initialized = false;
-
-    public UserDAOImpl() {
-        if (!initialized) {
-            initializeTable();
-            initialized = true;
-        }
-    }
-
-    private void initializeTable() {
-        String createTable = """
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT UNIQUE NOT NULL,
-                        password_hash TEXT NOT NULL,
-                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                """;
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-            stmt.execute(createTable);
-        } catch (SQLException e) {
-            System.err.println("Error initializing users table: " + e.getMessage());
-        }
-    }
 
     @Override
     public boolean create(String username, String passwordHash) {

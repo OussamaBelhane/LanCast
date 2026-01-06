@@ -12,34 +12,6 @@ import java.util.List;
 public class TransferLogDAOImpl implements TransferLogDAO {
 
     private static final String DB_URL = "jdbc:sqlite:lancast.db";
-    private static boolean initialized = false;
-
-    public TransferLogDAOImpl() {
-        if (!initialized) {
-            initializeTable();
-            initialized = true;
-        }
-    }
-
-    private void initializeTable() {
-        String createTable = """
-                    CREATE TABLE IF NOT EXISTS transfer_logs (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        client_ip TEXT,
-                        file_name TEXT,
-                        device_type TEXT,
-                        user_id INTEGER,
-                        timestamp TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                """;
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-            stmt.execute(createTable);
-        } catch (SQLException e) {
-            System.err.println("Error initializing transfer_logs table: " + e.getMessage());
-        }
-    }
 
     @Override
     public void create(String clientIp, String fileName, String deviceType, int userId) {
