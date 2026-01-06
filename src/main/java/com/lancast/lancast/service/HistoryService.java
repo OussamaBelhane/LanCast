@@ -1,63 +1,27 @@
 package com.lancast.lancast.service;
 
-import java.sql.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.lancast.lancast.dao.TransferLogDAO;
+import com.lancast.lancast.dao.TransferLogDAOImpl;
 import com.lancast.lancast.model.TransferLog;
 
 /**
- * Service for logging file transfers using SQLite database.
+ * Service for managing file transfer history.
+ * Uses TransferLogDAO for data access operations.
  */
 public class HistoryService {
 
-    private static final String DB_URL = "jdbc:sqlite:lancast.db";
-    private static boolean initialized = false;
+    private final TransferLogDAO transferLogDAO;
 
     public HistoryService() {
-        if (!initialized) {
-            initializeDatabase();
-            initialized = true;
-        }
-    }
-
-    private void initializeDatabase() {
-        String createTable = """
-                    CREATE TABLE IF NOT EXISTS transfer_logs (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        client_ip TEXT,
-                        file_name TEXT,
-                        device_type TEXT,
-                        user_id INTEGER,
-                        timestamp TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                """;
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-            stmt.execute(createTable);
-        } catch (SQLException e) {
-            System.err.println("Error initializing transfer_logs: " + e.getMessage());
-        }
+        this.transferLogDAO = new TransferLogDAOImpl();
     }
 
     public void logTransfer(String ip, String fileName, String deviceType, int userId) {
-        String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type, user_id) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, ip);
-            pstmt.setString(2, fileName);
-            pstmt.setString(3, deviceType);
-            pstmt.setInt(4, userId);
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.err.println("Error logging transfer: " + e.getMessage());
-        }
+        transferLogDAO.create(ip, fileName, deviceType, userId);
     }
 
     public void logTransfer(String ip, String fileName, String deviceType) {
@@ -65,59 +29,14 @@ public class HistoryService {
     }
 
     public List<TransferLog> getAllLogsForUser(int userId) {
-        List<TransferLog> logs = new ArrayList<>();
-        String sql = "SELECT * FROM transfer_logs WHERE user_id = ? ORDER BY id DESC";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                logs.add(new TransferLog(
-                        rs.getInt("id"),
-                        rs.getString("client_ip"),
-                        rs.getString("file_name"),
-                        rs.getString("device_type"),
-                        rs.getInt("user_id"),
-                        rs.getString("timestamp")));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error reading logs: " + e.getMessage());
-        }
-
-        return logs;
+        return transferLogDAO.findByUserId(userId);
     }
 
     public List<TransferLog> getAllLogs() {
         if (AuthService.isLoggedIn()) {
             return getAllLogsForUser(AuthService.getCurrentUserId());
         }
-
-        List<TransferLog> logs = new ArrayList<>();
-        String sql = "SELECT * FROM transfer_logs ORDER BY id DESC";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                logs.add(new TransferLog(
-                        rs.getInt("id"),
-                        rs.getString("client_ip"),
-                        rs.getString("file_name"),
-                        rs.getString("device_type"),
-                        rs.getInt("user_id"),
-                        rs.getString("timestamp")));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error reading logs: " + e.getMessage());
-        }
-
-        return logs;
+        return transferLogDAO.findAll();
     }
 
     public void printAllLogs() {
@@ -130,14 +49,7 @@ public class HistoryService {
     }
 
     public void clearLogs() {
-        String sql = "DELETE FROM transfer_logs";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            System.err.println("Error clearing logs: " + e.getMessage());
-        }
+        transferLogDAO.deleteAll();
     }
 
     public void exportToText(String file) {

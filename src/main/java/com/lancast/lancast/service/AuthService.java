@@ -1,43 +1,27 @@
 package com.lancast.lancast.service;
 
+import com.lancast.lancast.dao.UserDAO;
+import com.lancast.lancast.dao.UserDAOImpl;
 import com.lancast.lancast.model.User;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
 import java.util.Properties;
 
 /**
- * Service for user authentication using SQLite database.
+ * Service for user authentication.
+ * Uses UserDAO for data access operations.
  */
 public class AuthService {
 
-    private static final String DB_URL = "jdbc:sqlite:lancast.db";
     private static final String SESSION_FILE = "session.properties";
     private static User currentUser = null;
+    private final UserDAO userDAO;
 
     public AuthService() {
-        initializeDatabase();
-    }
-
-    private void initializeDatabase() {
-        String createUsersTable = """
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT UNIQUE NOT NULL,
-                        password_hash TEXT NOT NULL,
-                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                """;
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                Statement stmt = conn.createStatement()) {
-            stmt.execute(createUsersTable);
-        } catch (SQLException e) {
-            System.err.println("Error initializing users table: " + e.getMessage());
-        }
+        this.userDAO = new UserDAOImpl();
     }
 
     private String hashPassword(String password) {
@@ -63,30 +47,20 @@ public class AuthService {
             return false;
         }
 
-        String sql = "INSERT INTO users(username, password_hash) VALUES (?, ?)";
+        String normalizedUsername = username.trim().toLowerCase();
+        String passwordHash = hashPassword(password);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        boolean created = userDAO.create(normalizedUsername, passwordHash);
 
-            pstmt.setString(1, username.trim().toLowerCase());
-            pstmt.setString(2, hashPassword(password));
-            pstmt.executeUpdate();
-
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                int userId = rs.getInt(1);
-                currentUser = new User(userId, username.trim().toLowerCase(), null);
+        if (created) {
+            User user = userDAO.findByUsername(normalizedUsername);
+            if (user != null) {
+                currentUser = user;
                 System.out.println("User registered: " + username);
                 return true;
             }
-
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE constraint failed")) {
-                System.err.println("Username already exists: " + username);
-            } else {
-                System.err.println("Error registering user: " + e.getMessage());
-            }
         }
+
         return false;
     }
 
@@ -96,27 +70,17 @@ public class AuthService {
             return false;
         }
 
-        String sql = "SELECT id, username, created_at FROM users WHERE username = ? AND password_hash = ?";
+        String normalizedUsername = username.trim().toLowerCase();
+        String passwordHash = hashPassword(password);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        User user = userDAO.authenticate(normalizedUsername, passwordHash);
 
-            pstmt.setString(1, username.trim().toLowerCase());
-            pstmt.setString(2, hashPassword(password));
-
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                currentUser = new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("created_at"));
-                System.out.println("User logged in: " + currentUser.getUsername());
-                return true;
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error during login: " + e.getMessage());
+        if (user != null) {
+            currentUser = user;
+            System.out.println("User logged in: " + currentUser.getUsername());
+            return true;
         }
+
         return false;
     }
 
@@ -168,24 +132,14 @@ public class AuthService {
             return false;
         }
 
-        String sql = "SELECT id, username, created_at FROM users WHERE username = ?";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        User user = userDAO.findByUsername(username.trim().toLowerCase());
 
-            pstmt.setString(1, username.trim().toLowerCase());
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                currentUser = new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("created_at"));
-                System.out.println("Session restored for: " + currentUser.getUsername());
-                return true;
-            }
-        } catch (SQLException e) {
-            System.err.println("Error restoring session: " + e.getMessage());
+        if (user != null) {
+            currentUser = user;
+            System.out.println("Session restored for: " + currentUser.getUsername());
+            return true;
         }
+
         clearSession();
         return false;
     }
