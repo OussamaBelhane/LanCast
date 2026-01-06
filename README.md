@@ -160,25 +160,55 @@ From any device on the same network:
 
 ```
 LanCast/
-├── src/
-│   └── main/
-│       ├── java/com/lancast/lancast/
-│       │   ├── Launcher.java           # Application entry point
-│       │   ├── LanCastApplication.java # JavaFX Application
-│       │   ├── LanCastController.java  # Main UI controller
-│       │   ├── core/
-│       │   │   ├── LanCast.java        # Core server logic
-│       │   │   ├── QRService.java      # QR code generation
-│       │   │   ├── SettingsManager.java# Settings persistence
-│       │   │   └── ZipStreamManager.java# ZIP streaming
-│       │   └── database/
-│       │       ├── HistoryManager.java # Transfer history DB
-│       │       └── TransferLog.java    # Log data model
-│       └── resources/
-│           └── com/lancast/lancast/
-│               ├── lancast-view.fxml   # UI layout
-│               └── styles.css          # Stylesheet
-├── pom.xml                             # Maven configuration
+├── src/main/java/com/lancast/lancast/
+│   ├── Launcher.java                 # Entry point
+│   ├── LanCastApplication.java       # JavaFX Application
+│   │
+│   ├── controller/                   # UI Controllers
+│   │   ├── LanCastController.java    # Main controller
+│   │   ├── LoginController.java      # Authentication
+│   │   ├── FileHelper.java           # File management
+│   │   ├── HistoryHelper.java        # History display
+│   │   ├── NavigationHelper.java     # UI navigation
+│   │   ├── ReceiveHelper.java        # File receiving
+│   │   ├── ServerHelper.java         # Server management
+│   │   ├── SettingsHelper.java       # Settings UI
+│   │   └── ThemeHelper.java          # Theme switching
+│   │
+│   ├── model/                        # Data models
+│   │   ├── User.java                 # User account
+│   │   ├── TransferLog.java          # Transfer history
+│   │   └── PendingUpload.java        # Pending uploads
+│   │
+│   └── service/                      # Business logic
+│       ├── AuthService.java          # Authentication
+│       ├── FileSessionService.java   # File sessions
+│       ├── HistoryService.java       # History database
+│       ├── LanCastService.java       # Core service
+│       ├── NetworkService.java       # Network/peers
+│       ├── QRService.java            # QR code generation
+│       ├── SettingsService.java      # Settings persistence
+│       ├── ZipStreamService.java     # ZIP compression
+│       │
+│       └── handler/                  # HTTP handlers
+│           ├── RootHandler.java          # Main page
+│           ├── PinVerifyHandler.java     # PIN verification
+│           ├── FileListHandler.java      # File listing
+│           ├── FileDownloadHandler.java  # Downloads
+│           ├── DownloadHandler.java      # ZIP download
+│           ├── FileUploadHandler.java    # Uploads
+│           ├── ReceivedFilesListHandler.java
+│           └── ReceivedFileDownloadHandler.java
+│
+├── src/main/resources/com/lancast/lancast/
+│   ├── lancast-view.fxml             # Main UI layout
+│   ├── login-view.fxml               # Login UI
+│   ├── styles.css                    # Stylesheet
+│   └── images/                       # Icons
+│
+├── index.html                        # Web client interface
+├── styles.css                        # Web styles
+├── pom.xml                           # Maven configuration
 └── README.md
 ```
 
