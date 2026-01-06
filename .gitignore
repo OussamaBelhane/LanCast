@@ -54,3 +54,12 @@ uploads/
 qrcode.png
 build-output.txt
 *.log
+
+### Documentation (local only) ###
+docs/
+diagrams/
+
+### Session/History files ###
+session.properties
+history.log
+users.properties

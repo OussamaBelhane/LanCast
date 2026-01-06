@@ -703,18 +703,14 @@
         }
 
         function downloadAll() {
-            const links = document.querySelectorAll('#filesList .file-download');
-            if (links.length === 0) {
-                alert('No files to download.');
-                return;
-            }
-
-            // Trigger downloads with a slight delay to prevent browser blocking
-            links.forEach((link, index) => {
-                setTimeout(() => {
-                    link.click();
-                }, index * 500);
-            });
+            // Create a hidden link and click it to trigger download
+            const link = document.createElement('a');
+            link.href = '/download';
+            link.download = 'lanstream_files.zip';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // File Upload Functionality

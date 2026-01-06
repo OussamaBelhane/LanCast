@@ -22,31 +22,45 @@ public class ZipStreamService {
                     continue;
                 }
 
-                // Create a new ZipEntry for the file
-                ZipEntry zipEntry = new ZipEntry(file.getName());
-                zos.putNextEntry(zipEntry);
+                try {
+                    // Create a new ZipEntry for the file
+                    ZipEntry zipEntry = new ZipEntry(file.getName());
+                    zos.putNextEntry(zipEntry);
 
-                // Read the file content and write it to the ZipOutputStream
-                // Using BufferedInputStream for efficient reading
-                try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-                    byte[] buffer = new byte[8192]; // 8KB buffer
-                    int bytesRead;
-                    while ((bytesRead = bis.read(buffer)) != -1) {
-                        zos.write(buffer, 0, bytesRead);
+                    // Read the file content and write it to the ZipOutputStream
+                    try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+                        byte[] buffer = new byte[8192]; // 8KB buffer
+                        int bytesRead;
+                        while ((bytesRead = bis.read(buffer)) != -1) {
+                            zos.write(buffer, 0, bytesRead);
+                        }
                     }
-                }
 
-                // Close the current entry
-                zos.closeEntry();
+                    // Close the current entry
+                    zos.closeEntry();
+                } catch (IOException e) {
+                    // Connection reset is normal when client cancels download
+                    if (e.getMessage() != null &&
+                            (e.getMessage().contains("Connection reset") ||
+                                    e.getMessage().contains("connection was aborted"))) {
+                        System.out.println("Client disconnected during download: " + file.getName());
+                        return; // Exit gracefully
+                    }
+                    throw e;
+                }
             }
-            
-            // Finish the ZIP process (this writes the central directory)
-            // Note: We do NOT close the underlying 'out' stream here, as the server might need to do more with it,
-            // or the server framework handles closing the exchange stream. 
-            // However, ZipOutputStream.close() DOES close the underlying stream.
-            // In the context of HttpExchange, closing the response body stream is usually fine/required to end the response.
+
             zos.finish();
             zos.flush();
+        } catch (IOException e) {
+            // Silently handle connection reset errors
+            if (e.getMessage() != null &&
+                    (e.getMessage().contains("Connection reset") ||
+                            e.getMessage().contains("connection was aborted"))) {
+                System.out.println("Client disconnected during ZIP streaming");
+                return;
+            }
+            throw e;
         }
     }
 }

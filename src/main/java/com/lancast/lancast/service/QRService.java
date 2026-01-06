@@ -10,7 +10,6 @@ import javafx.scene.image.Image;
 
 import java.awt.image.BufferedImage;
 
-
 public class QRService {
 
     public Image generateQRCode(String text, int width, int height) throws WriterException {

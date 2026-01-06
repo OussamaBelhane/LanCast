@@ -1,35 +1,29 @@
 package com.lancast.lancast.controller;
 
-import com.lancast.lancast.service.LanCastService;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.lancast.lancast.LanCastApplication;
+import com.lancast.lancast.service.AuthService;
+import com.lancast.lancast.service.SettingsService;
+import com.lancast.lancast.model.TransferLog;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
-import javafx.util.Callback;
+import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.List;
 
-import com.lancast.lancast.service.HistoryService;
-import com.lancast.lancast.model.TransferLog;
-
+/**
+ * Main controller for the LanCast application.
+ * Delegates specific functionality to helper classes for better organization.
+ */
 public class LanCastController {
+
+    // =============================================
+    // FXML COMPONENTS
+    // =============================================
 
     @FXML
     private BorderPane rootPane;
@@ -58,7 +52,7 @@ public class LanCastController {
     @FXML
     private Label pinLabel;
     @FXML
-    private javafx.scene.image.ImageView qrCodeImageView;
+    private ImageView qrCodeImageView;
     @FXML
     private Label qrPlaceholderLabel;
     @FXML
@@ -97,8 +91,6 @@ public class LanCastController {
     private Label versionLabel;
     @FXML
     private Label settingsPinLabel;
-
-    // Theme controls
     @FXML
     private Button modeToggleBtn;
     @FXML
@@ -113,544 +105,226 @@ public class LanCastController {
     private Button accentOrangeBtn;
     @FXML
     private Button forceZipToggleBtn;
+    @FXML
+    private Label currentUserLabel;
 
-    private ObservableList<File> selectedFiles;
-    private com.lancast.lancast.service.SettingsService settingsManager;
-    private boolean isServerRunning = false;
-    private boolean isDarkMode = true;
-    private String currentAccent = "purple";
+    // =============================================
+    // HELPER CLASSES
+    // =============================================
+
+    private ThemeHelper themeHelper;
+    private NavigationHelper navigationHelper;
+    private FileHelper fileHelper;
+    private ServerHelper serverHelper;
+    private SettingsHelper settingsHelper;
+    private HistoryHelper historyHelper;
+    private ReceiveHelper receiveHelper;
+    private SettingsService settingsManager;
+
+    // =============================================
+    // INITIALIZATION
+    // =============================================
 
     @FXML
     public void initialize() {
-        selectedFiles = FXCollections.observableArrayList();
-        fileListView.setItems(selectedFiles);
-        setupFileListCellFactory();
+        settingsManager = new SettingsService();
 
-        settingsManager = new com.lancast.lancast.service.SettingsService();
-        refreshConnectionInfo();
-        updatePinDisplay();
-        updateForceZipDisplay();
-        setupDragAndDrop();
-        setupHistoryTable();
-        setupNavIcons();
+        // Initialize helpers
+        initializeHelpers();
 
-        homeView.setVisible(true);
-        historyView.setVisible(false);
-        settingsView.setVisible(false);
-        receiveView.setVisible(false);
-        updateNavigationStyles("home");
+        // Setup components
+        fileHelper.initialize();
+        navigationHelper.setupNavIcons();
+        navigationHelper.initializeViews();
+        historyHelper.setupHistoryTable();
+        serverHelper.initialize();
+        serverHelper.refreshConnectionInfo();
+        settingsHelper.updatePinDisplay();
+        settingsHelper.updateForceZipDisplay();
+        themeHelper.loadSavedTheme();
+        serverHelper.updateDashboardStats(fileHelper.getFileCount());
 
-        loadSavedTheme();
-        updateDashboardStats();
+        // Display current username
+        updateCurrentUserDisplay();
+
+        // Setup navigation callbacks
+        setupNavigationCallbacks();
     }
 
-    private void setupFileListCellFactory() {
-        fileListView.setCellFactory(new Callback<ListView<File>, ListCell<File>>() {
-            @Override
-            public ListCell<File> call(ListView<File> param) {
-                return new ListCell<File>() {
-                    @Override
-                    protected void updateItem(File item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setText(null);
-                            setGraphic(null);
-                        } else {
-                            HBox hbox = new HBox();
-                            hbox.setSpacing(8);
-                            hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+    private void initializeHelpers() {
+        themeHelper = new ThemeHelper(
+                rootPane, modeToggleBtn,
+                accentPurpleBtn, accentBlueBtn, accentPinkBtn, accentGreenBtn, accentOrangeBtn,
+                settingsManager);
 
-                            Label iconLabel = new Label("📄");
-                            iconLabel.setStyle("-fx-font-size: 14px;");
+        navigationHelper = new NavigationHelper(
+                homeView, historyView, settingsView, receiveView,
+                homeBtn, historyBtn, settingsBtn, receiveBtn);
 
-                            Label nameLabel = new Label(item.getName());
-                            nameLabel.setStyle(
-                                    "-fx-font-weight: 600; -fx-text-fill: -text-primary; -fx-font-size: 11px;");
+        fileHelper = new FileHelper(dropZone, fileListView, statusLabel, fileCountLabel);
 
-                            Label sizeLabel = new Label("(" + formatFileSize(item.length()) + ")");
-                            sizeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: -text-muted;");
+        serverHelper = new ServerHelper(
+                startBtn, ipLabel, urlLabel, pinLabel, peerCountLabel,
+                serverStatusLabel, versionLabel, fileCountLabel, statusCircle,
+                qrCodeImageView, qrPlaceholderLabel);
 
-                            Region spacer = new Region();
-                            HBox.setHgrow(spacer, Priority.ALWAYS);
+        settingsHelper = new SettingsHelper(pinLabel, settingsPinLabel, forceZipToggleBtn, settingsManager);
 
-                            Button removeBtn = new Button("✕");
-                            removeBtn.setStyle(
-                                    "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-cursor: hand;");
-                            removeBtn.setOnMouseEntered(e -> removeBtn.setStyle(
-                                    "-fx-background-color: rgba(239,68,68,0.1); -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-cursor: hand; -fx-background-radius: 4px;"));
-                            removeBtn.setOnMouseExited(e -> removeBtn.setStyle(
-                                    "-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-cursor: hand;"));
-                            removeBtn.setOnAction(event -> {
-                                selectedFiles.remove(item);
-                                LanCastService.removeFile(item);
-                                updateStatus();
-                            });
+        historyHelper = new HistoryHelper(historyTable, timeCol, deviceCol, fileCol, ipCol);
 
-                            hbox.getChildren().addAll(iconLabel, nameLabel, sizeLabel, spacer, removeBtn);
-                            setGraphic(hbox);
-                        }
-                    }
-                };
-            }
+        receiveHelper = new ReceiveHelper(receivedFilesListView, receivedCountLabel);
+    }
+
+    private void setupNavigationCallbacks() {
+        navigationHelper.setOnHomeSelected(() -> serverHelper.updateDashboardStats(fileHelper.getFileCount()));
+        navigationHelper.setOnHistorySelected(() -> historyHelper.loadHistoryData());
+        navigationHelper.setOnSettingsSelected(() -> {
+            settingsHelper.updatePinDisplay();
+            themeHelper.updateAccentButtonSelection();
         });
+        navigationHelper.setOnReceiveSelected(() -> receiveHelper.loadReceivedFiles());
     }
 
-    private void setupNavIcons() {
-        setNavIcon(homeBtn, "🏠");
-        setNavIcon(historyBtn, "📊");
-        setNavIcon(receiveBtn, "📥");
-        setNavIcon(settingsBtn, "⚙");
-    }
-
-    private void setNavIcon(Button btn, String icon) {
-        Label iconLabel = new Label(icon);
-        iconLabel.setStyle("-fx-font-size: 14px;");
-        btn.setGraphic(iconLabel);
-    }
-
-    
-    private void loadSavedTheme() {
-        String savedMode = settingsManager.getTheme();
-        String savedAccent = settingsManager.getAccentColor();
-
-        isDarkMode = !"light".equals(savedMode);
-        currentAccent = (savedAccent != null && !savedAccent.isEmpty()) ? savedAccent : "purple";
-
-        applyTheme();
-    }
-
-    private void applyTheme() {
-        // Remove old classes
-        rootPane.getStyleClass().removeAll("mode-dark", "mode-light",
-                "accent-purple", "accent-blue", "accent-pink", "accent-green", "accent-orange");
-
-        // Apply mode
-        rootPane.getStyleClass().add(isDarkMode ? "mode-dark" : "mode-light");
-
-        // Apply accent
-        rootPane.getStyleClass().add("accent-" + currentAccent);
-
-        // Update toggle button icon
-        if (modeToggleBtn != null) {
-            modeToggleBtn.setText(isDarkMode ? "🌙" : "☀️");
-        }
-
-        // Update accent button selection
-        updateAccentButtonSelection();
-
-        // Save preferences
-        settingsManager.setTheme(isDarkMode ? "dark" : "light");
-        settingsManager.setAccentColor(currentAccent);
-    }
-
-    private void updateAccentButtonSelection() {
-        if (accentPurpleBtn == null)
-            return;
-
-        accentPurpleBtn.getStyleClass().remove("selected");
-        accentBlueBtn.getStyleClass().remove("selected");
-        accentPinkBtn.getStyleClass().remove("selected");
-        accentGreenBtn.getStyleClass().remove("selected");
-        accentOrangeBtn.getStyleClass().remove("selected");
-
-        switch (currentAccent) {
-            case "purple":
-                accentPurpleBtn.getStyleClass().add("selected");
-                break;
-            case "blue":
-                accentBlueBtn.getStyleClass().add("selected");
-                break;
-            case "pink":
-                accentPinkBtn.getStyleClass().add("selected");
-                break;
-            case "green":
-                accentGreenBtn.getStyleClass().add("selected");
-                break;
-            case "orange":
-                accentOrangeBtn.getStyleClass().add("selected");
-                break;
+    private void updateCurrentUserDisplay() {
+        if (currentUserLabel != null && AuthService.isLoggedIn()) {
+            currentUserLabel.setText(AuthService.getCurrentUser().getUsername());
+        } else if (currentUserLabel != null) {
+            currentUserLabel.setText("Guest");
         }
     }
 
-    @FXML
-    private void handleModeToggle() {
-        isDarkMode = !isDarkMode;
-        applyTheme();
-    }
-
-    @FXML
-    private void handleForceZipToggle() {
-        boolean currentState = settingsManager.getForceZip();
-        settingsManager.setForceZip(!currentState);
-        updateForceZipDisplay();
-    }
-
-    @FXML
-    private void handleAccentPurple() {
-        currentAccent = "purple";
-        applyTheme();
-    }
-
-    @FXML
-    private void handleAccentBlue() {
-        currentAccent = "blue";
-        applyTheme();
-    }
-
-    @FXML
-    private void handleAccentPink() {
-        currentAccent = "pink";
-        applyTheme();
-    }
-
-    @FXML
-    private void handleAccentGreen() {
-        currentAccent = "green";
-        applyTheme();
-    }
-
-    @FXML
-    private void handleAccentOrange() {
-        currentAccent = "orange";
-        applyTheme();
-    }
-
-    
-    private void setupHistoryTable() {
-        timeCol.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
-        deviceCol.setCellValueFactory(new PropertyValueFactory<>("deviceType"));
-        fileCol.setCellValueFactory(new PropertyValueFactory<>("fileName"));
-        ipCol.setCellValueFactory(new PropertyValueFactory<>("clientIp"));
-    }
-
-    private void loadHistoryData() {
-        HistoryService hm = new HistoryService();
-        List<TransferLog> logs = hm.getAllLogs();
-        historyTable.setItems(FXCollections.observableArrayList(logs));
-    }
-
-    private void refreshConnectionInfo() {
-        String fullUrl = LanCastService.getIpAddress(); // Already returns "http://IP:PORT/"
-
-        // Extract just the IP for the short display
-        String ipOnly = fullUrl.replace("http://", "").replace("/", "");
-
-        if (ipLabel != null)
-            ipLabel.setText(ipOnly);
-        if (urlLabel != null)
-            urlLabel.setText(fullUrl);
-
-        try {
-            com.lancast.lancast.service.QRService qrService = new com.lancast.lancast.service.QRService();
-            javafx.scene.image.Image qrImage = qrService.generateQRCode(fullUrl, 200, 200);
-            qrCodeImageView.setImage(qrImage);
-            if (qrPlaceholderLabel != null)
-                qrPlaceholderLabel.setVisible(false);
-        } catch (Exception e) {
-            System.err.println("Failed to generate QR Code: " + e.getMessage());
-        }
-    }
-
-    private void updatePinDisplay() {
-        String pin = settingsManager.getPin();
-        if (pinLabel != null)
-            pinLabel.setText(pin);
-        if (settingsPinLabel != null)
-            settingsPinLabel.setText(pin);
-    }
-
-    private void updateForceZipDisplay() {
-        boolean forceZip = settingsManager.getForceZip();
-        if (forceZipToggleBtn != null)
-            forceZipToggleBtn.setText(forceZip ? "ON" : "OFF");
-    }
-
-    @FXML
-    private void handleRefreshPin() {
-        int randomPin = (int) (Math.random() * 9000) + 1000;
-        String newPin = String.valueOf(randomPin);
-        settingsManager.setPin(newPin);
-        updatePinDisplay();
-    }
-
-    @FXML
-    private void handleCopyUrl() {
-        if (urlLabel != null && urlLabel.getText() != null) {
-            // Save the original URL first before any changes
-            String urlToCopy = urlLabel.getText();
-
-            // Copy to clipboard
-            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
-            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-            content.putString(urlToCopy);
-            clipboard.setContent(content);
-
-            // Show visual feedback
-            urlLabel.setText("✓ Copied!");
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(() -> urlLabel.setText(urlToCopy));
-                } catch (InterruptedException e) {
-                }
-            }).start();
-        }
-    }
-
-    // ============================================
-    // DRAG AND DROP
-    // ============================================
-
-    private void setupDragAndDrop() {
-        dropZone.setOnDragOver(event -> {
-            if (event.getGestureSource() != dropZone && event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-            event.consume();
-        });
-
-        dropZone.setOnDragDropped(event -> {
-            var db = event.getDragboard();
-            boolean success = false;
-            if (db.hasFiles()) {
-                addFiles(db.getFiles());
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-        });
-    }
-
-    private void addFiles(List<File> files) {
-        for (File file : files) {
-            if (!selectedFiles.contains(file)) {
-                selectedFiles.add(file);
-                LanCastService.addFile(file);
-            }
-        }
-        updateStatus();
-    }
-
-    // ============================================
-    // STATUS UPDATES
-    // ============================================
-
-    private void updateStatus() {
-        int count = selectedFiles.size();
-        if (statusLabel != null)
-            statusLabel.setText(String.valueOf(count));
-        if (fileCountLabel != null)
-            fileCountLabel.setText(String.valueOf(count));
-    }
-
-    private void updateDashboardStats() {
-        if (fileCountLabel != null)
-            fileCountLabel.setText(String.valueOf(selectedFiles.size()));
-        if (peerCountLabel != null)
-            peerCountLabel.setText("0");
-    }
-
-    private void updateServerStatus(boolean running) {
-        if (statusCircle != null)
-            statusCircle.setFill(running ? Color.web("#22c55e") : Color.web("#ef4444"));
-        if (serverStatusLabel != null)
-            serverStatusLabel.setText(running ? "Online" : "Offline");
-        if (versionLabel != null)
-            versionLabel.setText("v1.0.0 • " + (running ? "Online" : "Offline"));
-    }
-
-    // ============================================
-    // BUTTON HANDLERS
-    // ============================================
-
-    @FXML
-    private void handleClear() {
-        selectedFiles.clear();
-        LanCastService.resetSession();
-        updateStatus();
-    }
-
-    @FXML
-    private void handleStart() {
-        if (!isServerRunning) {
-            try {
-                LanCastService.startServer();
-                isServerRunning = true;
-                startBtn.setText("⏹ Stop");
-                startBtn.getStyleClass().remove("server-button-start");
-                startBtn.getStyleClass().add("server-button-stop");
-                updateServerStatus(true);
-                refreshConnectionInfo();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            LanCastService.stopServer();
-            isServerRunning = false;
-            startBtn.setText("▶ Start");
-            startBtn.getStyleClass().remove("server-button-stop");
-            startBtn.getStyleClass().add("server-button-start");
-            updateServerStatus(false);
-        }
-    }
-
-    // ============================================
-    // NAVIGATION
-    // ============================================
+    // =============================================
+    // NAVIGATION HANDLERS
+    // =============================================
 
     @FXML
     private void handleHome() {
-        showView("home");
+        navigationHelper.showView("home");
     }
 
     @FXML
     private void handleHistory() {
-        showView("history");
-        loadHistoryData();
+        navigationHelper.showView("history");
     }
 
     @FXML
     private void handleSettings() {
-        showView("settings");
-        updatePinDisplay();
-        updateAccentButtonSelection();
+        navigationHelper.showView("settings");
     }
 
     @FXML
     private void handleReceive() {
-        showView("receive");
-        loadReceivedFiles();
+        navigationHelper.showView("receive");
     }
 
-    private void showView(String view) {
-        homeView.setVisible("home".equals(view));
-        historyView.setVisible("history".equals(view));
-        settingsView.setVisible("settings".equals(view));
-        receiveView.setVisible("receive".equals(view));
-        updateNavigationStyles(view);
-        if ("home".equals(view))
-            updateDashboardStats();
-    }
+    // =============================================
+    // FILE HANDLERS
+    // =============================================
 
     @FXML
-    private void handleRefreshReceived() {
-        loadReceivedFiles();
-    }
-
-    @FXML
-    private void handleOpenUploadsFolder() {
-        try {
-            java.awt.Desktop.getDesktop().open(new File("uploads"));
-        } catch (Exception e) {
-            System.err.println("Could not open folder: " + e.getMessage());
-        }
-    }
-
-    private void loadReceivedFiles() {
-        List<File> received = LanCastService.getReceivedFiles();
-        List<com.lancast.lancast.model.PendingUpload> pending = LanCastService.getPendingUploads();
-        
-        ObservableList<String> displayList = FXCollections.observableArrayList();
-        for (com.lancast.lancast.model.PendingUpload p : pending) {
-            displayList.add("PENDING|" + p.getFileName());
-        }
-        for (File f : received) {
-            displayList.add("DOWNLOADED|" + f.getName());
-        }
-        
-        receivedFilesListView.setItems(displayList);
-        receivedCountLabel.setText((pending.size() + received.size()) + " files");
-
-        receivedFilesListView.setCellFactory(lv -> new ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    String[] parts = item.split("\\|", 2);
-                    String status = parts[0];
-                    String fileName = parts[1];
-                    
-                    HBox hbox = new HBox(8);
-                    hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                    
-                    Label icon;
-                    Label name;
-                    
-                    if ("PENDING".equals(status)) {
-                        icon = new Label("⏳");
-                        icon.setStyle("-fx-font-size: 14px;");
-                        name = new Label(fileName);
-                        name.setStyle("-fx-font-size: 11px; -fx-text-fill: -accent-color; -fx-font-weight: bold;");
-                        
-                        Button downloadBtn = new Button("📥");
-                        downloadBtn.setStyle("-fx-background-color: -accent-color; -fx-text-fill: white; " +
-                                           "-fx-font-size: 12px; -fx-cursor: hand; -fx-padding: 4 8;");
-                        downloadBtn.setOnAction(e -> {
-                            if (LanCastService.acceptPendingUpload(fileName)) {
-                                loadReceivedFiles();
-                            }
-                        });
-                        
-                        hbox.getChildren().addAll(icon, name, downloadBtn);
-                    } else {
-                        icon = new Label("✅");
-                        icon.setStyle("-fx-font-size: 14px;");
-                        name = new Label(fileName);
-                        name.setStyle("-fx-font-size: 11px; -fx-text-fill: -text-primary;");
-                        hbox.getChildren().addAll(icon, name);
-                    }
-                    
-                    setGraphic(hbox);
-                }
-            }
-        });
-    }
-
-    // ============================================
-    // UTILITY
-    // ============================================
-
-    private String formatFileSize(long bytes) {
-        if (bytes < 1024)
-            return bytes + " B";
-        if (bytes < 1024 * 1024)
-            return String.format("%.1f KB", bytes / 1024.0);
-        if (bytes < 1024 * 1024 * 1024)
-            return String.format("%.1f MB", bytes / (1024.0 * 1024));
-        return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
-    }
-
-    private void updateNavigationStyles(String activeView) {
-        homeBtn.getStyleClass().remove("active");
-        historyBtn.getStyleClass().remove("active");
-        settingsBtn.getStyleClass().remove("active");
-        receiveBtn.getStyleClass().remove("active");
-
-        switch (activeView) {
-            case "home":
-                homeBtn.getStyleClass().add("active");
-                break;
-            case "history":
-                historyBtn.getStyleClass().add("active");
-                break;
-            case "settings":
-                settingsBtn.getStyleClass().add("active");
-                break;
-            case "receive":
-                receiveBtn.getStyleClass().add("active");
-                break;
-        }
+    private void handleClear() {
+        fileHelper.handleClear();
     }
 
     @FXML
     private void handleBrowseFiles() {
-        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
-        fileChooser.setTitle("Select Files");
-        List<File> files = fileChooser.showOpenMultipleDialog(dropZone.getScene().getWindow());
-        if (files != null)
-            addFiles(files);
+        fileHelper.handleBrowseFiles();
+    }
+
+    // =============================================
+    // SERVER HANDLERS
+    // =============================================
+
+    @FXML
+    private void handleStart() {
+        serverHelper.handleStart();
+    }
+
+    @FXML
+    private void handleCopyUrl() {
+        serverHelper.handleCopyUrl();
+    }
+
+    // =============================================
+    // SETTINGS HANDLERS
+    // =============================================
+
+    @FXML
+    private void handleRefreshPin() {
+        settingsHelper.handleRefreshPin();
+    }
+
+    @FXML
+    private void handleForceZipToggle() {
+        settingsHelper.handleForceZipToggle();
+    }
+
+    // =============================================
+    // THEME HANDLERS
+    // =============================================
+
+    @FXML
+    private void handleModeToggle() {
+        themeHelper.handleModeToggle();
+    }
+
+    @FXML
+    private void handleAccentPurple() {
+        themeHelper.setAccent("purple");
+    }
+
+    @FXML
+    private void handleAccentBlue() {
+        themeHelper.setAccent("blue");
+    }
+
+    @FXML
+    private void handleAccentPink() {
+        themeHelper.setAccent("pink");
+    }
+
+    @FXML
+    private void handleAccentGreen() {
+        themeHelper.setAccent("green");
+    }
+
+    @FXML
+    private void handleAccentOrange() {
+        themeHelper.setAccent("orange");
+    }
+
+    // =============================================
+    // RECEIVE HANDLERS
+    // =============================================
+
+    @FXML
+    private void handleRefreshReceived() {
+        receiveHelper.handleRefreshReceived();
+    }
+
+    @FXML
+    private void handleOpenUploadsFolder() {
+        receiveHelper.handleOpenUploadsFolder();
+    }
+
+    // =============================================
+    // AUTH HANDLERS
+    // =============================================
+
+    @FXML
+    private void handleLogout() {
+        new AuthService().logout();
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(LanCastApplication.class.getResource("login-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 800, 650);
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setTitle("LanCast - Login");
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Failed to load login view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

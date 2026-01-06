@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="com.lancast.lancast.controller.LoginController"
+           stylesheets="@styles.css" styleClass="login-root-container">
+
+   <!-- Decorative Background Elements (handled via CSS/Shape) -->
+   <Circle styleClass="bg-circle-1" StackPane.alignment="TOP_LEFT" opacity="0.5"/>
+   <Circle styleClass="bg-circle-2" StackPane.alignment="BOTTOM_RIGHT" opacity="0.5"/>
+
+   <!-- Login Card -->
+   <VBox styleClass="login-card" alignment="CENTER" maxWidth="420" spacing="0">
+      <padding>
+         <Insets top="40" right="40" bottom="40" left="40"/>
+      </padding>
+
+      <!-- Logo / Header -->
+      <VBox alignment="CENTER" spacing="8" styleClass="login-header">
+         <Label text="LANCast" styleClass="brand-title"/>
+         <Label fx:id="subtitleLabel" text="Welcome back" styleClass="brand-subtitle"/>
+      </VBox>
+
+      <!-- Spacing -->
+      <VBox minHeight="30" />
+
+      <!-- Form Fields -->
+      <VBox spacing="16" alignment="CENTER_LEFT">
+         
+         <VBox spacing="6">
+            <Label text="Username" styleClass="field-label"/>
+            <TextField fx:id="usernameField" promptText="Enter your username" styleClass="form-input"/>
+         </VBox>
+
+         <VBox spacing="6">
+            <Label text="Password" styleClass="field-label"/>
+            <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="form-input"/>
+         </VBox>
+
+         <!-- Confirm Password (Signup only) -->
+         <VBox fx:id="confirmPasswordBox" spacing="6" visible="false" managed="false">
+            <Label text="Confirm Password" styleClass="field-label"/>
+            <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" styleClass="form-input"/>
+         </VBox>
+      </VBox>
+
+      <!-- Remember Me (Login only) -->
+      <HBox fx:id="rememberMeBox" alignment="CENTER_LEFT" spacing="8">
+         <VBox.margin>
+            <Insets top="12"/>
+         </VBox.margin>
+         <CheckBox fx:id="rememberMeCheckbox"/>
+         <Label text="Remember me" styleClass="text-muted"/>
+      </HBox>
+
+      <!-- Error Message -->
+      <Label fx:id="errorLabel" styleClass="error-message" wrapText="true" opacity="0" maxWidth="Infinity">
+         <VBox.margin>
+            <Insets top="15" bottom="5"/>
+         </VBox.margin>
+      </Label>
+
+      <!-- Action Button -->
+      <Button fx:id="submitBtn" text="Sign In" styleClass="primary-button" maxWidth="Infinity" onAction="#handleSubmit">
+         <VBox.margin>
+            <Insets top="10" bottom="20"/>
+         </VBox.margin>
+      </Button>
+
+      <!-- Toggle Mode -->
+      <HBox alignment="CENTER" spacing="6">
+         <Label fx:id="togglePromptLabel" text="Don't have an account?" styleClass="text-muted"/>
+         <Button fx:id="toggleBtn" text="Sign Up" styleClass="link-button" onAction="#handleToggleMode"/>
+      </HBox>
+      
+   </VBox>
+
+</StackPane>

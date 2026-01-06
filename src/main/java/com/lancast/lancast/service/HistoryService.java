@@ -8,17 +8,43 @@ import java.util.List;
 
 import com.lancast.lancast.model.TransferLog;
 
+/**
+ * Service for logging file transfers using SQLite database.
+ */
 public class HistoryService {
 
     private static final String DB_URL = "jdbc:sqlite:lancast.db";
+    private static boolean initialized = false;
 
     public HistoryService() {
-        // Table is created automatically
+        if (!initialized) {
+            initializeDatabase();
+            initialized = true;
+        }
     }
 
-    // save transfer to database
-    public void logTransfer(String ip, String fileName, String deviceType) {
-        String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type) VALUES (?, ?, ?)";
+    private void initializeDatabase() {
+        String createTable = """
+                    CREATE TABLE IF NOT EXISTS transfer_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        client_ip TEXT,
+                        file_name TEXT,
+                        device_type TEXT,
+                        user_id INTEGER,
+                        timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                    )
+                """;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement()) {
+            stmt.execute(createTable);
+        } catch (SQLException e) {
+            System.err.println("Error initializing transfer_logs: " + e.getMessage());
+        }
+    }
+
+    public void logTransfer(String ip, String fileName, String deviceType, int userId) {
+        String sql = "INSERT INTO transfer_logs(client_ip, file_name, device_type, user_id) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -26,17 +52,50 @@ public class HistoryService {
             pstmt.setString(1, ip);
             pstmt.setString(2, fileName);
             pstmt.setString(3, deviceType);
+            pstmt.setInt(4, userId);
             pstmt.executeUpdate();
-
-
 
         } catch (SQLException e) {
             System.err.println("Error logging transfer: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
+    public void logTransfer(String ip, String fileName, String deviceType) {
+        logTransfer(ip, fileName, deviceType, AuthService.getCurrentUserId());
+    }
+
+    public List<TransferLog> getAllLogsForUser(int userId) {
+        List<TransferLog> logs = new ArrayList<>();
+        String sql = "SELECT * FROM transfer_logs WHERE user_id = ? ORDER BY id DESC";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                logs.add(new TransferLog(
+                        rs.getInt("id"),
+                        rs.getString("client_ip"),
+                        rs.getString("file_name"),
+                        rs.getString("device_type"),
+                        rs.getInt("user_id"),
+                        rs.getString("timestamp")));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading logs: " + e.getMessage());
+        }
+
+        return logs;
+    }
+
     public List<TransferLog> getAllLogs() {
+        if (AuthService.isLoggedIn()) {
+            return getAllLogsForUser(AuthService.getCurrentUserId());
+        }
+
         List<TransferLog> logs = new ArrayList<>();
         String sql = "SELECT * FROM transfer_logs ORDER BY id DESC";
 
@@ -50,12 +109,12 @@ public class HistoryService {
                         rs.getString("client_ip"),
                         rs.getString("file_name"),
                         rs.getString("device_type"),
+                        rs.getInt("user_id"),
                         rs.getString("timestamp")));
             }
 
         } catch (SQLException e) {
             System.err.println("Error reading logs: " + e.getMessage());
-            e.printStackTrace();
         }
 
         return logs;
@@ -70,75 +129,15 @@ public class HistoryService {
         }
     }
 
-    public void deleteLog(int id) {
-        String sql = "DELETE FROM transfer_logs WHERE id = ?";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-
-            // Log deleted successfully
-
-        } catch (SQLException e) {
-            System.err.println("Error deleting log: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     public void clearLogs() {
         String sql = "DELETE FROM transfer_logs";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement()) {
-
             stmt.execute(sql);
-            // All logs cleared successfully
-
         } catch (SQLException e) {
             System.err.println("Error clearing logs: " + e.getMessage());
-            e.printStackTrace();
         }
-    }
-
-    // Search logs by IP, filename, device
-    private List<TransferLog> search(String column, String value) {
-        List<TransferLog> results = new ArrayList<>();
-        String sql = "SELECT * FROM transfer_logs WHERE " + column + " LIKE ?";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, "%" + value + "%");
-
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                results.add(new TransferLog(
-                        rs.getInt("id"),
-                        rs.getString("client_ip"),
-                        rs.getString("file_name"),
-                        rs.getString("device_type"),
-                        rs.getString("timestamp")));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Search error: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return results;
-    }
-
-    public List<TransferLog> searchByIP(String ip) {
-        return search("client_ip", ip);
-    }
-
-    public List<TransferLog> searchByFile(String file) {
-        return search("file_name", file);
-    }
-
-    public List<TransferLog> searchByDevice(String device) {
-        return search("device_type", device);
     }
 
     public void exportToText(String file) {
@@ -148,7 +147,6 @@ public class HistoryService {
             System.out.println("Exported to " + file);
         } catch (IOException e) {
             System.err.println("Error exporting to text: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -171,7 +169,6 @@ public class HistoryService {
 
         } catch (IOException e) {
             System.err.println("Error exporting to JSON: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }
