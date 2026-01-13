@@ -53,7 +53,7 @@ public class ThemeHelper {
         rootPane.getStyleClass().add("accent-" + currentAccent);
 
         if (modeToggleBtn != null) {
-            modeToggleBtn.setText(isDarkMode ? "🌙" : "☀️");
+            modeToggleBtn.setText(isDarkMode ? "🌙" : "☀");
         }
 
         updateAccentButtonSelection();

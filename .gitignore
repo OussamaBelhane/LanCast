@@ -63,3 +63,10 @@ diagrams/
 session.properties
 history.log
 users.properties
+
+### Exclusions requested by user ###
+rapport/
+*.png
+screenshots/
+generate_*.py
+uploads/

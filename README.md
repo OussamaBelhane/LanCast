@@ -239,7 +239,7 @@ Gtk-Message: Failed to load module "colorreload-gtk-module"
 |------|--------|
 | **Oussama Belhane** | [@OussamaBelhane](https://github.com/OussamaBelhane) |
 | **Manal Wassila** | [@manalwassila](https://github.com/manalwassila) |
-| **Hiba Ayatallah** | [@Biba7124](https://github.com/Biba7124) |
+| **Hiba Ayatallah** | [@HibaAyatallah](https://github.com/HibaAyatallah) |
 | **Labzae Chaimae** | [@chaimaeLabzae](https://github.com/chaimaeLabzae) |
 
 ---
